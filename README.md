@@ -1,223 +1,146 @@
+<p align="center">
+  <img src="logo/pysol-lite-logo-horizontal.png" alt="PySol Lite" width="420">
+</p>
+
 # PySol Lite
 
-A lighter PySol: more than 1,200 solitaire and patience games
-written in Python with Tkinter. This fork focuses on macOS on Apple Silicon.
-The Windows and Linux code is kept but has not been run since the clean-up.
-The version number is the year and month (for example 26.11).
+A lighter PySol: 276 solitaire and patience games, written in Python with
+Tkinter. This fork focuses on macOS on Apple Silicon. The Windows and Linux
+code is kept but has not been run since the clean-up. The version number is
+the year and month (for example 26.11).
 
 PySol Lite is based on PySol by Markus F.X.J. Oberhumer, the PySol Fan Club
-edition and PySolFC (https://github.com/shlomif/PySolFC), and is licensed
-under the GNU General Public License. `PROGRESS-NOTES.md` is the working log
-of what has changed and why.
+edition and [PySolFC](https://github.com/shlomif/PySolFC), and is licensed
+under the GNU General Public License, version 3 (see `COPYING`).
+`PROGRESS-NOTES.md` is the working log of what has changed and why.
 
-## Requirements.
+## What it has
 
-- Python (3.10 or later)
-- Tkinter (Tcl/Tk 8.6 or later)
+- 276 games in 22 categories (Klondike, FreeCell, Spider, Yukon, Forty
+  Thieves, Pairing, Mahjongg, Cribbage, Poker and more), each with its own
+  rules page in the built-in help.
+- A Select game dialog with a live preview, name search (including alternate
+  names) and a category filter, plus Recent, Favorite and Popular games in
+  the Games menu.
+- Toolbar buttons for favorite (heart) and bookmark, unlimited undo and redo,
+  hints, and optional automatic play.
+- One Settings window, and screen reader support (see Accessibility in the
+  help).
 
-- For sound support (optional)
-  - PySol-Sound-Server fork: https://github.com/shlomif/pysol-sound-server (wav)
-  - (or: ) PyGame (or PyGame CE): https://www.pygame.org/ (wav)
+## Requirements
 
-- Other packages (optional):
-  - Pillow (Python Imaging Library): https://pillow.readthedocs.io/
-  - Accessible Output 2: https://accessible-output2.readthedocs.io/
-  - Freecell Solver: https://fc-solve.shlomifish.org/
-  - [Black Hole Solitaire Solver](https://www.shlomifish.org/open-source/projects/black-hole-solitaire-solver/)
+- Python 3.10 or later, with Tkinter (Tcl/Tk 8.6 or later).
+- Pillow, `attrs`, `configobj` and `pysol-cards`.
+- Optional: `pygame-ce` for sound, `accessible-output2` for screen readers.
+- To build the macOS app: `py2app`, `setuptools` and `pycotap`, and the
+  python.org Python 3.13.17 or later installer (its Tk has the fix for
+  dialogs opened from menus freezing on macOS 27).
 
-## Installation.
+## Build and install the macOS app
 
-We provide an [installer for Windows](https://sourceforge.net/projects/pysolfc/files/PySolFC/)
-(requires Windows XP SP3 or higher).
+This is the tested procedure (Apple Silicon, arm64 only). A folder that is
+not iCloud-synced is best: iCloud adds duplicate folders and extended
+attributes that break the build and the code signature (see the notes
+below).
 
-### Running from source without installation.
+1. Create a build environment:
 
-You can run from the source directory:
+   ```
+   python3 -m venv .build-venv
+   .build-venv/bin/pip install py2app setuptools attrs configobj pillow \
+       pycotap pygame-ce pysol-cards accessible-output2
+   ```
 
-```
-python pysol.py
-```
+2. Get the cardsets. They are a separate download and are not in git. Download
+   `PySolFC-Cardsets--Minimal-3.1.0.tar.xz` from the
+   [PySolFC cardsets page](https://sourceforge.net/projects/pysolfc/files/PySolFC-Cardsets/minimal/),
+   extract it into its own empty folder, and copy `cardset-standard` and
+   `cardset-uni-mahjongg` into `data/`. The build removes every other cardset
+   and trims the card backs (`scripts/prune_card_backs.py`).
 
-After following steps similar to these (on
-[Mageia Linux](http://www.mageia.org/) ):
+3. Generate the help pages with the build environment's Python (the system
+   Python lacks the `attr` module and `make` then fails without saying so):
 
+   ```
+   PATH="$PWD/.build-venv/bin:$PATH" make rules
+   ls data/html/rules/*.html | wc -l      # 256 pages
+   ```
 
-#### Step 1 - install the dependencies
+4. Build the app:
 
-On Fedora you can do:
+   ```
+   PYTHONPATH=$PWD .build-venv/bin/python setup_osx.py py2app --arch arm64
+   ```
 
-```
-sudo dnf builddep PySolFC
-```
+   If py2app stops because `pygame_icon.icns` is missing from the `pygame`
+   package, copy it from the pygame-ce source of the installed version
+   (`src_py/pygame_icon.icns`, see pygame-ce issue 2780).
 
-On Mageia you can do:
+5. The bundled Python is still universal, so remove the Intel code from every
+   Mach-O file:
 
-```
-sudo urpmi git make tkinter
-```
+   ```
+   find "dist/PySol Lite.app" -type f -print0 | while IFS= read -r -d '' f; do
+     if file "$f" | grep -q Mach-O && lipo -archs "$f" | grep -q x86_64 \
+        && lipo -archs "$f" | grep -q arm64; then
+       lipo -thin arm64 "$f" -output /tmp/thin && cat /tmp/thin > "$f"
+     fi
+   done
+   ```
 
-On Debian / Ubuntu / etc. you can do:
+6. Sign a clean copy and install it. Quit PySol Lite first, since replacing a
+   running app causes trouble:
 
-```
-sudo apt-get install cpanminus make perl python3-setuptools python3-tk
-```
+   ```
+   ditto --norsrc --noextattr --noqtn "dist/PySol Lite.app" /tmp/PySolLite/"PySol Lite.app"
+   codesign --force --deep --sign - /tmp/PySolLite/"PySol Lite.app"
+   codesign -v /tmp/PySolLite/"PySol Lite.app"
+   ditto --norsrc --noextattr --noqtn /tmp/PySolLite/"PySol Lite.app" ~/Applications/"PySol Lite.app"
+   ~/Applications/"PySol Lite.app"/Contents/MacOS/"PySol Lite" --version
+   ```
 
-#### Step 2 - build PySol.
+Things that go wrong:
 
-You can try running:
+- **iCloud duplicates.** iCloud can create copies such as `data/html 2` or
+  `accessibility 2.html`, and py2app then bundles them. Before building,
+  `ls -d data/html*` should print only `data/html`; after building,
+  `find dist -name "* [0-9].*" -o -name "* [0-9]"` should print nothing.
+- **Settings.** The app stores its settings and saved games in `~/.pysol`.
+  Checking a build with `--version` does not touch them; launching the app
+  does.
 
-```
-python3 scripts/linux-install.py
-```
+`PROGRESS-NOTES.md` has the full history and more detail.
 
-```
-git clone https://github.com/spidermedic/Pysol-Lite.git
-cd Pysol-Lite
-# Now make sure you have installed the dependencies.
-gmake test
-gmake rules
-ln -s data/images images
-tar -xvf PySolFC-Cardsets-3.0.tar.bz2 # Needs to be downloaded from sourceforge
-mkdir -p ~/.pysol
-rmdir ~/.pysol/cardsets
-ln -s "`pwd`/PySolFC-Cardsets-3.0" ~/.pysol/cardsets
-python pysol.py
-```
+## Run from source
 
-<b>Note!</b> If you are using a Debian derivative (e.g: Debian, Ubuntu, or
-Linux Mint) and you are getting an error of "No cardsets were found !!! Main
-data directory is `[insert dir here]` Please check your PySol installation.",
-then you likely installed the cardsets package which has removed some files
-that are needed by pysol from source (without the debian modifications).
-
-Please uninstall that package and use the cardsets archive from sourceforge.net
-per the instructions above.
-
-### Installing from source and running in a python venv (virtual environment)
-
-At the moment, this only works on POSIX (Linux, FreeBSD and similar) systems.
-Windows and Mac users - you'll need to chip in with a script for your system.
-
-#### 1 - Install build prerequisite: pysol-cards
-
-This is kind of stupid and maybe it can be fixed in the future, but for now:
-
-```
-pip install pysol-cards
-```
-
-You may want to use your OS distribution package system instead, for example:
-
-```
-sudo apt-get install python3-pysol-cards
-```
-
-For Pillow compilation, libjpeg headers and libraries need to be available:
+On macOS, with the cardsets in `data/` and the help pages generated as above:
 
 ```
-sudo apt-get install libjpeg-dev
+PYTHONPATH=$PWD .build-venv/bin/python pysol.py
 ```
 
-#### 2 - Clone the source from version control
+To run the tests:
 
 ```
-git clone https://github.com/spidermedic/Pysol-Lite.git
-cd Pysol-Lite
+PYTHONPATH=$PWD .build-venv/bin/python -m unittest discover -s . -p 'test*.py'
 ```
 
-#### 3 - Create your virtual environment.
+`test_version_flag` fails unless a `python` command is on your PATH; the
+others pass.
 
-```
-PKGTREE=/usr/local/packages/PySolFC # or whatever
-export PKGTREE
-mkdir -p "$PKGTREE"
-( cd "$PKGTREE" && python -m venv ./env )
-```
+## Windows and Linux (untested)
 
-#### 4 - Run the install script
+The Windows and Linux code is still in the tree, but nothing has been run
+there since the clean-up, and this fork provides no installers. If you want
+to try, install Python, Tkinter and the packages above, put the cardsets in
+`~/.pysol/cardsets`, generate the help pages with `make rules`, and run
+`python pysol.py`. The upstream
+[PySolFC](https://github.com/shlomif/PySolFC) README has install instructions
+for those platforms; `scripts/linux-install.py` and
+`contrib/install-pysolfc.sh` come from there and have not been tested here.
 
-```
-./contrib/install-pysolfc.sh
-```
+## Credits
 
-#### 5 - Put cardsets into place as above.
-
-#### 6 - Enjoy playing
-
-```
-"$PKGTREE"/env/bin/pysol.py
-```
-
-### Configuring Freecell Solver
-
-If you want to use the solver, you should configure freecell-solver
-( https://fc-solve.shlomifish.org/ ) by passing the following options
-to its CMake-based build-system:
-`-DMAX_NUM_FREECELLS=8 -DMAX_NUM_STACKS=20 -DMAX_NUM_INITIAL_CARDS_IN_A_STACK=60`.
-
-### Building the macOS app.
-
-This fork targets macOS on Apple Silicon (arm64) and uses Tcl/Tk with themed
-widgets only. Use the python.org Python 3.13.17 or later installer, so that
-the bundled Tk includes the fix for menu-opened dialogs freezing on macOS 27.
-
-```
-python3 -m venv .build-venv
-.build-venv/bin/pip install py2app setuptools attrs configobj pillow pycotap \
-    pygame-ce pysol-cards accessible-output2
-# Cardsets are a separate download, see "Install Extras" below; put the
-# cardset-* folders into data/
-make rules
-PYTHONPATH=. .build-venv/bin/python setup_osx.py py2app --arch arm64
-```
-
-The bundled Python is still universal, so remove the x86_64 slices from
-every Mach-O file in `dist/PySol.app` with `lipo -thin arm64`, then
-ad-hoc sign it (copy it out of iCloud-synced folders first). See
-`PROGRESS-NOTES.md` for the complete, tested procedure.
-
-## Install Extras.
-
-- Cardsets
- - Copy cardsets to ~/.pysol/cardsets
-
- - Additional cardsets can be downloaded from the PySolFC project page:
-     https://sourceforge.net/projects/pysolfc/files/
-
-## Related repositories and links
-
-- [PySol-Sound-Server fork](https://github.com/shlomif/pysol-sound-server)
-- [Sources for the PySolFC web site](https://github.com/shlomif/pysolfc-website)
-- [PySolFC Announcements Drafts](https://github.com/shlomif/pysolfc-announcements)
-- [PySolFC-Cardsets tarballs sources repo](https://github.com/shlomif/PySolFC-Cardsets)
-- [Extra mahjongg cardsets for PySolFC - originally for flowersol](https://github.com/shlomif/PySol-Extra-Mahjongg-Cardsets)
-
-Related:
-
-- [Freecell Solver](https://github.com/shlomif/fc-solve)
-- [Black Hole Solver](https://github.com/shlomif/black-hole-solitaire)
-
-Other open source solitaires:
-
-- [solitaire.gg](https://github.com/KyleU/solitaire.gg) - web-based and written in Scala
-- [Solitairey](https://github.com/shlomif/Solitairey/branches) - web-based written in JavaScript
-- [KPat](https://games.kde.org/game.php?game=kpat) - desktop-based for KDE.
-- [Aisleriot](https://wiki.gnome.org/Apps/Aisleriot) - desktop-based by the GNOME project with relatively limited functionality.
-
-Screencasts:
-
-- [Black Hole solving](https://github.com/shlomif/pysolfc-black-hole-solver--screencast)
-- [Freecell solving using the qualified-seed-improved preset](https://bitbucket.org/shlomif/pysolfc-qualified-seed-improved-screencast)
-
-## Chat
-
-To facilitate coordination about contributing to PySol, please join us for a
-real time Internet chat on
-the <a href="irc://irc.freenode.net/##pysol">##pysol</a> chat room on
-[Freenode](http://freenode.net/) (note the double
-octothorpe/hash-sign/pound-sign).  We may set up
-chat rooms on different services in the future.
-
-In addition, we set up a
-[Google Group for discussing open source card games](https://groups.google.com/forum/#!forum/foss-card-games)
-which will also be used for discussing PySol. Feel free to subscribe or post!
+The credits page in the built-in help (Help, Contents, then Credits) lists the
+people who contributed to PySol, PySolFC and this fork. The toolbar icons are
+[Phosphor Icons](https://phosphoricons.com/) (MIT license).
