@@ -172,10 +172,6 @@ class GI:
         ("French", lambda gi, gf=GT_ORIGINAL: gi.si.game_flags & gf),
     )
 
-    SELECT_CONTRIB_GAME_BY_TYPE = (
-        ("French", lambda gi, gf=GT_CONTRIB: gi.si.game_flags & gf),
-    )
-
     SELECT_SPECIAL_GAME_BY_TYPE = (
         ("Cribbage",
             lambda gi, gt=GT_CRIBBAGE_TYPE: gi.si.game_type == gt),
