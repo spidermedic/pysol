@@ -148,8 +148,6 @@ class AlgerianPatience3(Carthage):
 
 
 # Register the Carthage and Algerian Patience (3 Decks) games in the system.
-registerGame(GameInfo(321, Carthage, "Carthage",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(457, AlgerianPatience3, "Algerian Patience (3 Decks)",
                       GI.GT_3DECK_TYPE | GI.GT_ORIGINAL, 3, 0,
                       GI.SL_MOSTLY_SKILL))

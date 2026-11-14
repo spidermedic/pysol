@@ -24,230 +24,23 @@
 from pysollib.game import Game
 from pysollib.gamedb import GI, GameInfo, registerGame
 from pysollib.games.numerica import Numerica_Hint
-from pysollib.hint import AbstractHint
 from pysollib.layout import Layout
 from pysollib.pysoltk import MfxCanvasText
 from pysollib.stack import (
-    AbstractFoundationStack,
     OpenStack,
     OpenTalonStack,
     ReserveStack,
     SS_FoundationStack,
-    StackWrapper,
 )
 from pysollib.util import (
     ACE,
-    ANY_RANK,
-    ANY_SUIT,
-    JACK,
     KING,
-    QUEEN,
     UNLIMITED_CARDS,
 )
 # ************************************************************************
-# * Camelot
-# ************************************************************************
-
-
-class Camelot_Hint(AbstractHint):
-
-    def computeHints(self):
-        game = self.game
-        if game.is_fill:
-            nhints = 0
-            i = 0
-            for r in game.s.rows:
-                i += 1
-                if not r.cards:
-                    continue
-                if r.cards[0].rank == 9:
-                    self.addHint(5000, 1, r, game.s.foundations[0])
-                    nhints += 1
-                    continue
-                for t in game.s.rows[i:]:
-                    if t.acceptsCards(r, [r.cards[0]]):
-                        self.addHint(5000, 1, r, t)
-                        nhints += 1
-            if nhints:
-                return
-        if game.s.talon.cards:
-            for r in game.s.rows:
-                if r.acceptsCards(game.s.talon, [game.s.talon.cards[-1]]):
-                    self.addHint(5000, 1, game.s.talon, r)
-
-
-class Camelot_RowStack(ReserveStack):
-
-    def acceptsCards(self, from_stack, cards):
-        if from_stack is self.game.s.talon:
-            if len(self.cards) > 0:
-                return False
-            cr = cards[0].rank
-            if cr == KING:
-                return self.id in (0, 3, 12, 15)
-            if cr == QUEEN:
-                return self.id in (1, 2, 13, 14)
-            if cr == JACK:
-                return self.id in (4, 7, 8, 11)
-            return True
-        if len(self.cards) == 0:
-            return False
-        return self.cards[-1].rank + cards[0].rank == 8
-
-    def canMoveCards(self, cards):
-        if not self.game.is_fill:
-            return False
-        return cards[0].rank not in (KING, QUEEN, JACK)
-
-    def clickHandler(self, event):
-        game = self.game
-        if game.is_fill and self.cards and self.cards[0].rank == 9:
-            game.playSample("autodrop", priority=20)
-            self.playMoveMove(1, game.s.foundations[0], sound=False)
-            self.fillStack()
-            return True
-        if not self.cards and game.s.talon.cards and \
-                self.acceptsCards(game.s.talon, [game.s.talon.cards[-1]]):
-            game.s.talon.playMoveMove(1, self)
-            return True
-
-        return False
-
-    def moveMove(self, ncards, to_stack, frames=-1, shadow=-1):
-        if to_stack is not self.game.s.foundations[0]:
-            self._dropPairMove(ncards, to_stack, frames=-1, shadow=shadow)
-        else:
-            ReserveStack.moveMove(
-                self, ncards, to_stack, frames=frames, shadow=shadow)
-
-    def _dropPairMove(self, n, other_stack, frames=-1, shadow=-1):
-        game = self.game
-        old_state = game.enterState(game.S_FILL)
-        f = game.s.foundations[0]
-        game.updateStackMove(game.s.talon, 2 | 16)            # for undo
-        if not game.demo:
-            game.playSample("droppair", priority=200)
-        game.moveMove(n, self, f, frames=frames, shadow=shadow)
-        game.moveMove(n, other_stack, f, frames=frames, shadow=shadow)
-        self.fillStack()
-        other_stack.fillStack()
-        game.updateStackMove(game.s.talon, 1 | 16)            # for redo
-        game.leaveState(old_state)
-
-
-class Camelot_Foundation(AbstractFoundationStack):
-    def acceptsCards(self, from_stack, cards):
-        return True
-
-
-class Camelot_Talon(OpenTalonStack):
-    def fillStack(self):
-        old_state = self.game.enterState(self.game.S_FILL)
-        self.game.saveStateMove(2 | 16)            # for undo
-        self.game.is_fill = self.game.isRowsFill()
-        self.game.saveStateMove(1 | 16)            # for redo
-        self.game.leaveState(old_state)
-        OpenTalonStack.fillStack(self)
-
-
-class Camelot(Game):
-
-    Talon_Class = Camelot_Talon
-    RowStack_Class = StackWrapper(Camelot_RowStack, max_move=0)
-    Hint_Class = Camelot_Hint
-
-    # game variables
-    is_fill = False
-
-    #
-    # game layout
-    #
-
-    def createGame(self):
-        # create layout
-        l, s = Layout(self), self.s
-        # set window
-        w = l.XS
-        self.setSize(l.XM + w + 4*l.XS + w + l.XS, l.YM + 4*l.YS)
-        # create stacks
-        stackNum = 0
-        font = self.app.getFont("canvas_default")
-        for i in range(4):
-            for j in range(4):
-                x, y = l.XM + w + j*l.XS, l.YM + i*l.YS
-                stack = self.RowStack_Class(x, y, self)
-                if self.preview <= 1:
-                    stack.texts.misc = MfxCanvasText(self.canvas,
-                                                     x + l.CW // 2,
-                                                     y + l.CH // 2,
-                                                     anchor="center",
-                                                     font=font)
-                    if stackNum in (0, 3, 12, 15):
-                        stack.texts.misc.config(text="K")
-                    elif stackNum in (1, 2, 13, 14):
-                        stack.texts.misc.config(text="Q")
-                    elif stackNum in (4, 7, 8, 11):
-                        stack.texts.misc.config(text="J")
-                s.rows.append(stack)
-                stackNum += 1
-        x, y = l.XM, l.YM
-        s.talon = self.Talon_Class(x, y, self)
-        l.createText(s.talon, 's')
-        x, y = l.XM + w + 4*l.XS + w, l.YM
-        s.foundations.append(Camelot_Foundation(x, y, self,
-                             suit=ANY_SUIT, dir=0, base_rank=ANY_RANK,
-                             max_accept=0, max_move=0, max_cards=52))
-        l.createText(s.foundations[0], 's')
-        # define stack-groups
-        l.defaultStackGroups()
-        return l
-
-    #
-    # game overrides
-    #
-
-    def startGame(self):
-        self.is_fill = False
-        self.s.talon.fillStack()
-
-    def isGameWon(self):
-        for i in (5, 6, 9, 10):
-            if len(self.s.rows[i].cards) != 0:
-                return False
-        return len(self.s.talon.cards) == 0
-
-    def isRowsFill(self):
-        if len(self.s.talon.cards) == 0:
-            return True
-        for i in range(16):
-            if len(self.s.rows[i].cards) == 0:
-                return False
-        return True
-
-    def _restoreGameHook(self, game):
-        self.is_fill = game.loadinfo.is_fill
-
-    def _loadGameHook(self, p):
-        self.loadinfo.addattr(is_fill=p.load())
-
-    def _saveGameHook(self, p):
-        p.dump(self.is_fill)
-
-    def getAutoStacks(self, event=None):
-        return ((), (), ())
-
-    def setState(self, state):
-        # restore saved vars (from undo/redo)
-        self.is_fill = state[0]
-
-    def getState(self):
-        # save vars (for undo/redo)
-        return [self.is_fill]
-
-
-# ************************************************************************
 # * Sly Fox
 # ************************************************************************
+
 
 class SlyFox_Foundation(SS_FoundationStack):
     def acceptsCards(self, from_stack, cards):
@@ -364,8 +157,5 @@ class SlyFox(Game):
 
 
 # register the game
-registerGame(GameInfo(280, Camelot, "Camelot",
-                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_BALANCED,
-                      altnames=("Kings in the Corners")))
 registerGame(GameInfo(610, SlyFox, "Sly Fox",
                       GI.GT_NUMERICA, 2, 0, GI.SL_BALANCED))

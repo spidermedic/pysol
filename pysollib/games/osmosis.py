@@ -165,14 +165,7 @@ class Osmosis(Osmium):
         self.s.talon.dealCards()
 
 
-class Peek(Osmosis):
-    def startGame(self):
-        Osmosis.startGame(self, flip=1)
-
-
 # register the game
 registerGame(GameInfo(715, Osmosis, "Osmosis",
                       GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK,
                       altnames=("Treasure Trove",)))
-registerGame(GameInfo(716, Peek, "Peek",
-                      GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK))

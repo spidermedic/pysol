@@ -27,22 +27,16 @@ from pysollib.hint import AbstractHint
 from pysollib.hint import BlackHoleSolverWrapper
 from pysollib.layout import Layout
 from pysollib.mfxutil import kwdefault
-from pysollib.pysoltk import MfxCanvasText
 from pysollib.stack import (
     AbstractFoundationStack,
-    AutoDealTalonStack,
     BasicRowStack,
     InitialDealTalonStack,
-    OpenStack,
-    RK_FoundationStack,
-    RK_RowStack,
     ReserveStack,
-    SS_FoundationStack,
     StackWrapper,
     WasteStack,
     WasteTalonStack,
 )
-from pysollib.util import ANY_RANK, ANY_SUIT, KING, NO_RANK, RANKS
+from pysollib.util import ANY_RANK, ANY_SUIT, KING
 
 
 class Golf_Hint(AbstractHint):
@@ -538,231 +532,6 @@ class Robert(Game):
         self.s.talon.dealCards()
 
 
-# ************************************************************************
-# * Vague
-# ************************************************************************
-
-class Vague_RowStack(BasicRowStack):
-    clickHandler = BasicRowStack.doubleclickHandler
-
-
-class Vague(Game):
-    Foundation_Classes = [StackWrapper(SS_FoundationStack,
-                                       base_rank=ANY_RANK, mod=13)]
-
-    SEPARATE_FOUNDATIONS = True
-    SPREAD_FOUNDATION = False
-
-    def createGame(self, rows=3, columns=6):
-        layout, s = Layout(self), self.s
-        decks = self.gameinfo.decks
-        maxrows = max(columns, 2+decks*4)
-        self.setSize(layout.XM+maxrows*layout.XS, layout.YM+(rows+1)*layout.YS)
-
-        x, y = layout.XM, layout.YM
-        s.talon = AutoDealTalonStack(x, y, self)
-        layout.createText(s.talon, 'ne')
-
-        x, y = layout.XM+2*layout.XS, layout.YM
-        for found in self.Foundation_Classes:
-            if self.SEPARATE_FOUNDATIONS:
-                for i in range(4):
-                    s.foundations.append(found(x, y, self, suit=i))
-                    x += layout.XS
-            else:
-                s.foundations.append(found(x, y, self, suit=ANY_SUIT))
-                if self.SPREAD_FOUNDATION:
-                    w1, w2 = 6 * layout.XS + layout.XM, 2 * layout.XS
-
-                    totalcards = self.gameinfo.ncards
-                    if w2 + totalcards * layout.XOFFSET > w1:
-                        layout.XOFFSET = int((w1 - w2) / totalcards)
-                    s.foundations[0].CARD_XOFFSET = layout.XOFFSET
-
-        y = layout.YM+layout.YS
-        for i in range(rows):
-            x = layout.XM + (maxrows-columns)*layout.XS//2
-            for j in range(columns):
-                s.rows.append(Vague_RowStack(x, y, self))
-                x += layout.XS
-            y += layout.YS
-
-        layout.defaultStackGroups()
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
-
-    def fillStack(self, stack):
-        if stack in self.s.rows and not stack.cards:
-            if self.s.talon.cards:
-                old_state = self.enterState(self.S_FILL)
-                if not self.s.talon.cards[-1].face_up:
-                    self.s.talon.flipMove()
-                self.s.talon.moveMove(1, stack)
-                self.leaveState(old_state)
-
-    def getAutoStacks(self, event=None):
-        if event is None:
-            # disable auto drop - this would ruin the whole gameplay
-            return ((), (), self.sg.dropstacks)
-        # rightclickHandler
-        return ((), self.sg.dropstacks, self.sg.dropstacks)
-
-
-# ************************************************************************
-# * Devil's Solitaire
-# ************************************************************************
-
-class DevilsSolitaire_Foundation(RK_FoundationStack):
-    def acceptsCards(self, from_stack, cards):
-        if not RK_FoundationStack.acceptsCards(self, from_stack, cards):
-            return False
-        if self.cards:
-            return True
-        if self.game.s.reserves[0].cards:
-            c = self.game.s.reserves[0].cards[-1]
-            return (c.rank+1) % 13 == cards[-1].rank
-        return True
-
-
-class DevilsSolitaire_WasteStack(WasteStack):
-    clickHandler = WasteStack.doubleclickHandler
-
-
-class DevilsSolitaire(Game):
-
-    def createGame(self):
-        layout, s = Layout(self), self.s
-        self.setSize(
-            layout.XM+9*layout.XS,
-            layout.YM+3*layout.YS+7*layout.YOFFSET+2*layout.TEXT_HEIGHT)
-
-        x, y = layout.XM+4*layout.XS, layout.YM
-        stack = DevilsSolitaire_Foundation(
-            x, y, self, suit=ANY_SUIT, base_rank=ANY_RANK, mod=13)
-        tx, ty, ta, tf = layout.getTextAttr(stack, 'nw')
-        font = self.app.getFont('canvas_default')
-        stack.texts.misc = MfxCanvasText(self.canvas, tx, ty,
-                                         anchor=ta, font=font)
-        s.foundations.append(stack)
-
-        x, y = self.width-layout.XS, layout.YM
-        stack = AbstractFoundationStack(
-            x, y, self,
-            suit=ANY_SUIT, max_move=0, max_cards=104,
-            max_accept=0, base_rank=ANY_RANK)
-        layout.createText(stack, 'nw')
-        s.foundations.append(stack)
-
-        x, y = layout.XM, layout.YM+layout.YS
-        for i in range(4):
-            s.rows.append(Vague_RowStack(x, y, self))
-            x += layout.XS
-        x += layout.XS
-        for i in range(4):
-            s.rows.append(Vague_RowStack(x, y, self))
-            x += layout.XS
-
-        x, y = layout.XM+4*layout.XS, layout.YM+layout.YS
-        stack = OpenStack(x, y, self)
-        stack.CARD_YOFFSET = layout.YOFFSET
-        s.reserves.append(stack)
-
-        x, y = layout.XM+4.5*layout.XS, self.height-layout.YS
-        s.talon = WasteTalonStack(x, y, self, max_rounds=3)
-        layout.createText(s.talon, 'se')
-        layout.createRoundText(s.talon, 'n')
-        x -= layout.XS
-        s.waste = DevilsSolitaire_WasteStack(x, y, self)
-        layout.createText(s.waste, 'sw')
-
-        layout.defaultStackGroups()
-
-    def startGame(self):
-        for i in range(8):
-            self.s.talon.dealRow(rows=self.s.reserves, frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()
-
-    def fillStack(self, stack):
-        old_state = self.enterState(self.S_FILL)
-        if stack in self.s.rows and not stack.cards:
-            if not self.s.waste.cards:
-                self.s.talon.dealCards()
-            if self.s.waste.cards:
-                self.s.waste.moveMove(1, stack)
-        f0 = self.s.foundations[0]
-        if len(f0.cards) == 12:
-            self.moveMove(1, self.s.reserves[0], f0, frames=4)
-            f1 = self.s.foundations[1]
-            for i in range(13):
-                self.moveMove(1, f0, f1, frames=4)
-        self.leaveState(old_state)
-
-    def updateText(self):
-        if self.preview > 1:
-            return
-        f = self.s.foundations[0]
-        r = self.s.reserves[0]
-        if not r.cards:
-            t = ''
-        else:
-            c = r.cards[-1]
-            t = RANKS[(c.rank+1) % 13]
-        f.texts.misc.config(text=t)
-
-
-# ************************************************************************
-# * Beacon
-# ************************************************************************
-
-class Beacon(Game):
-
-    def createGame(self, rows=8):
-        # create layout
-        layout, s = Layout(self), self.s
-
-        # set window
-        playcards = 12
-        self.setSize(
-            layout.XM+rows*layout.XS,
-            layout.YM + 3 * layout.YS + playcards * layout.YOFFSET)
-
-        # create stacks
-        x, y = layout.XM + (rows - 1) * layout.XS // 2, layout.YM
-        stack = RK_FoundationStack(x, y, self, base_rank=ANY_RANK,
-                                   max_cards=52, mod=13)
-        s.foundations.append(stack)
-        layout.createText(stack, 'ne')
-
-        x, y = layout.XM, layout.YM+layout.YS
-        for i in range(rows):
-            s.rows.append(RK_RowStack(x, y, self, base_rank=NO_RANK, mod=13))
-            x += layout.XS
-
-        x, y = layout.XM, self.height-layout.YS
-        s.talon = AutoDealTalonStack(x, y, self)
-        layout.createText(s.talon, 'se')
-
-        # define stack-groups
-        layout.defaultStackGroups()
-
-    def startGame(self):
-        self._startDealNumRowsAndDealSingleRow(3)
-
-    def fillStack(self, stack):
-        if stack in self.s.rows and not stack.cards:
-            if self.s.talon.cards:
-                old_state = self.enterState(self.S_FILL)
-                self.s.talon.flipMove()
-                self.s.talon.moveMove(1, stack)
-                self.leaveState(old_state)
-
-    shallHighlightMatch = Game._shallHighlightMatch_RKW
-
-
 # register the game
 registerGame(GameInfo(36, Golf, "Golf",
                       GI.GT_GOLF, 1, 0, GI.SL_BALANCED,
@@ -778,14 +547,6 @@ registerGame(GameInfo(98, BlackHole, "Black Hole",
 registerGame(GameInfo(405, AllInARow, "All in a Row",
                       GI.GT_GOLF | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL,
                       altnames=("Quasar",)))
-registerGame(GameInfo(720, Vague, "Vague",
-                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
-registerGame(GameInfo(723, DevilsSolitaire, "Devil's Solitaire",
-                      GI.GT_2DECK_TYPE, 2, 2, GI.SL_BALANCED,
-                      altnames=('Banner',)))
-registerGame(GameInfo(764, Beacon, "Beacon",
-                      GI.GT_1DECK_TYPE | GI.GT_ORIGINAL, 1, 0,
-                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(941, BinaryStar, "Binary Star",
                       GI.GT_GOLF | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL,
                       altnames=("Black Holes",)))

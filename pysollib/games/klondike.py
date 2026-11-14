@@ -32,7 +32,6 @@ from pysollib.mfxutil import Struct, kwdefault
 from pysollib.stack import (
     AC_RowStack,
     BO_RowStack,
-    DealFirstRowTalonStack,
     DealRowTalonStack,
     InitialDealTalonStack,
     KingAC_RowStack,
@@ -44,7 +43,6 @@ from pysollib.stack import (
     SC_RowStack,
     SS_FoundationStack,
     SS_RowStack,
-    Spider_SS_RowStack,
     Stack,
     StackWrapper,
     SuperMoveAC_RowStack,
@@ -52,7 +50,7 @@ from pysollib.stack import (
     WasteTalonStack,
     isSameColorSequence,
 )
-from pysollib.util import ACE, ANY_RANK, KING, NO_RANK
+from pysollib.util import ACE, KING, NO_RANK
 
 # ************************************************************************
 # * Klondike
@@ -665,66 +663,6 @@ class Phoenix(Klondike):
 
 
 # ************************************************************************
-# * Thirty-Six
-# * Six By Six
-# ************************************************************************
-
-class ThirtySix(Klondike):
-
-    Foundation_Class = StackWrapper(SS_FoundationStack, max_move=0)
-    RowStack_Class = StackWrapper(RK_RowStack, base_rank=ANY_RANK)
-
-    def createGame(self):
-        Klondike.createGame(self, rows=6, max_rounds=1)
-
-    def _fillOne(self):
-        for r in self.s.rows:
-            if r.cards:
-                c = r.cards[-1]
-                for f in self.s.foundations:
-                    if f.acceptsCards(r, [c]) and c.rank == ACE:
-                        self.moveMove(1, r, f, frames=4, shadow=0)
-                        return 1
-        return 0
-
-    def startGame(self):
-        self.startDealSample()
-        for i in range(6):
-            self.s.talon.dealRow()
-            while True:
-                if not self._fillOne():
-                    break
-        self.s.talon.dealCards()          # deal first card to WasteStack
-
-    shallHighlightMatch = Game._shallHighlightMatch_RK
-
-
-class SixBySix(ThirtySix):
-    CARDSPERROW = 6
-
-    Talon_Class = StackWrapper(DealFirstRowTalonStack, max_move=0)
-    RowStack_Class = StackWrapper(Spider_SS_RowStack, base_rank=ANY_RANK)
-
-    def createGame(self):
-        Klondike.createGame(self, rows=6, max_rounds=1, waste=0, playcards=16)
-
-    def startGame(self):
-        self.startDealSample()
-        for i in range(self.CARDSPERROW):
-            self.s.talon.dealRow()
-            while True:
-                if not self._fillOne():
-                    break
-
-
-class Eights(SixBySix):
-    CARDSPERROW = 8
-
-    def createGame(self):
-        Klondike.createGame(self, rows=8, max_rounds=1, waste=0, playcards=20)
-
-
-# ************************************************************************
 # * Aunt Mary
 # ************************************************************************
 
@@ -861,58 +799,6 @@ class GoldMine(Klondike):
 
 
 # ************************************************************************
-# * Lucky Thirteen
-# * Lucky Piles
-# ************************************************************************
-
-class LuckyThirteen(Game):
-    Hint_Class = CautiousDefaultHint
-    RowStack_Class = StackWrapper(RK_RowStack, base_rank=NO_RANK)
-
-    def createGame(self, xoffset=0, playcards=0):
-        lay, s = Layout(self), self.s
-        if xoffset:
-            xoffset = lay.XOFFSET
-        w0 = lay.XS+playcards*lay.XOFFSET
-        self.setSize(lay.XM + 5*w0, lay.YM+4*lay.YS)
-
-        x, y = lay.XM, lay.YM+lay.YS
-        for i in range(5):
-            stack = self.RowStack_Class(x, y, self, max_move=1)
-            s.rows.append(stack)
-            stack.CARD_XOFFSET = xoffset
-            stack.CARD_YOFFSET = 0
-            x += w0
-        x, y = lay.XM+w0, lay.YM+2*lay.YS
-        for i in range(3):
-            stack = self.RowStack_Class(x, y, self, max_move=1)
-            s.rows.append(stack)
-            stack.CARD_XOFFSET = xoffset
-            stack.CARD_YOFFSET = 0
-            x += w0
-        x, y = lay.XM, lay.YM+3*lay.YS
-        for i in range(5):
-            stack = self.RowStack_Class(x, y, self, max_move=1)
-            s.rows.append(stack)
-            stack.CARD_XOFFSET = xoffset
-            stack.CARD_YOFFSET = 0
-            x += w0
-        x, y = (self.width-4*lay.XS)//2, lay.YM
-        for i in range(4):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i))
-            x += lay.XS
-        x, y = lay.XM, self.height-lay.YS
-        s.talon = InitialDealTalonStack(x, y, self, max_rounds=1)
-
-        lay.defaultStackGroups()
-
-    def startGame(self):
-        self._startDealNumRowsAndDealSingleRow(3)
-
-    shallHighlightMatch = Game._shallHighlightMatch_RK
-
-
-# ************************************************************************
 # * Athena
 # ************************************************************************
 
@@ -1017,8 +903,6 @@ registerGame(GameInfo(541, BatsfordAgain, "Batsford Again",
                       GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
 registerGame(GameInfo(572, GoldMine, "Gold Mine",
                       GI.GT_NUMERICA, 1, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(585, LuckyThirteen, "Lucky Thirteen",
-                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(633, Athena, "Athena",
                       GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED))
 registerGame(GameInfo(651, EightByEight, "Eight by Eight",

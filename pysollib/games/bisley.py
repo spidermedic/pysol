@@ -23,13 +23,10 @@
 
 from pysollib.game import Game
 from pysollib.gamedb import GI, GameInfo, registerGame
-from pysollib.hint import CautiousDefaultHint
 from pysollib.layout import Layout
 from pysollib.stack import \
     InitialDealTalonStack, \
     SS_FoundationStack, \
-    StackWrapper, \
-    UD_AC_RowStack, \
     UD_SS_RowStack
 from pysollib.util import ACE, KING, NO_RANK
 
@@ -92,53 +89,7 @@ class Bisley(Game):
     shallHighlightMatch = Game._shallHighlightMatch_SS
 
 
-# ************************************************************************
-# * Realm
-# ************************************************************************
-
-class Realm(Game):
-
-    Hint_Class = CautiousDefaultHint
-    RowStack_Class = StackWrapper(UD_AC_RowStack, base_rank=NO_RANK)
-
-    def createGame(self):
-        # create layout
-        l, s = Layout(self), self.s
-
-        # set window
-        w, h = 3*l.XM+8*l.XS, l.YM+2*l.YS+15*l.YOFFSET
-        self.setSize(w, h)
-
-        # create stacks
-        x, y = 2*l.XM, l.YM+l.YS
-        for i in range(8):
-            s.rows.append(self.RowStack_Class(x, y, self))
-            x += l.XS
-        y = l.YM
-        for i in range(4):
-            x = l.XM+i*l.XS
-            s.foundations.append(SS_FoundationStack(x, y, self, i, max_move=0))
-            x += 2*l.XM+4*l.XS
-            s.foundations.append(SS_FoundationStack(x, y, self, i,
-                                 base_rank=KING, max_move=0, dir=-1))
-
-        s.talon = InitialDealTalonStack(w-l.XS, h-l.YS, self)
-
-        # default
-        l.defaultAll()
-
-    def startGame(self):
-        self._startDealNumRows(5)
-        self.s.talon.dealRow()
-        self.s.talon.dealRowAvail()
-
-    shallHighlightMatch = Game._shallHighlightMatch_AC
-
-
 # register the game
 registerGame(GameInfo(290, Bisley, "Bisley",
                       GI.GT_BAKERS_DOZEN | GI.GT_OPEN, 1, 0,
                       GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(374, Realm, "Realm",
-                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL,
-                      1, 0, GI.SL_MOSTLY_SKILL))

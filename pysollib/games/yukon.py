@@ -425,44 +425,6 @@ class Brisbane(Yukon):
 
 
 # ************************************************************************
-# * Wave
-# ************************************************************************
-
-class WaveTalon(DealRowTalonStack):
-    def dealCards(self, sound=False):
-        if sound and self.game.app.opt.animations:
-            self.game.startDealSample()
-        n = self.dealRowAvail(flip=0, sound=False)
-        n += self.dealRowAvail(sound=False)
-        if sound:
-            self.game.stopSamples()
-        return n
-
-
-class Wave(Game):
-    Hint_Class = Yukon_Hint
-
-    def createGame(self, rows=8):
-        l, s = Layout(self), self.s
-        l.klondikeLayout(rows=rows, waste=0, playcards=25)
-        self.setSize(l.size[0], l.size[1])
-        s.talon = WaveTalon(l.s.talon.x, l.s.talon.y, self)
-        for r in l.s.foundations:
-            s.foundations.append(SS_FoundationStack(r.x, r.y, self,
-                                                    suit=r.suit))
-        for r in l.s.rows:
-            s.rows.append(Yukon_AC_RowStack(r.x, r.y, self))
-        l.defaultAll()
-
-    def startGame(self):
-        self.s.talon.dealRow(frames=0)
-        self.s.talon.dealRow(frames=0, flip=0)
-        self._startAndDealRow()
-
-    shallHighlightMatch = Game._shallHighlightMatch_AC
-
-
-# ************************************************************************
 # * Yukon Cells
 # * Russian Cell
 # ************************************************************************

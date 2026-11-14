@@ -23,14 +23,10 @@
 
 from pysollib.game import Game
 from pysollib.gamedb import GI, GameInfo, registerGame
-from pysollib.hint import CautiousDefaultHint
 from pysollib.layout import Layout
 from pysollib.stack import \
-    AC_RowStack, \
     BasicRowStack, \
     DealRowRedealTalonStack, \
-    DealRowTalonStack, \
-    OpenStack, \
     ReserveStack, \
     SS_FoundationStack
 from pysollib.util import ACE, KING
@@ -139,77 +135,7 @@ class Tournament(Game):
                 self.stopSamples()
 
 
-# ************************************************************************
-# * Kingsdown Eights
-# ************************************************************************
-
-
-class KingsdownEights_Talon(DealRowTalonStack):
-    def dealCards(self, sound=False):
-        if len(self.cards) == 0:
-            self._redeal()
-        self.game.startDealSample()
-        n = 0
-        for r in self.game.s.reserves:
-            for i in range(4):
-                if not self.cards:
-                    break
-                n += self.dealRow([r])
-        self.game.stopSamples()
-        return n
-
-
-class KingsdownEights(Game):
-
-    Hint_Class = CautiousDefaultHint
-
-    def createGame(self):
-
-        # create layout
-        l, s = Layout(self), self.s
-
-        # set window
-        self.setSize(l.XM+10*l.XS, max(l.YM+2*l.YS+12*l.YOFFSET,
-                                       l.YM+5*l.YS))
-
-        # create stacks
-        x = l.XM
-        for i in range(2):
-            y = l.YM+l.YS
-            for j in range(4):
-                s.foundations.append(SS_FoundationStack(x, y, self, suit=j))
-                y += l.YS
-            x += l.XS
-        x, y = l.XM+2*l.XS, l.YM
-        for i in range(8):
-            stack = AC_RowStack(x, y, self, max_move=1)
-            stack.getBottomImage = stack._getReserveBottomImage
-            stack.CARD_XOFFSET, stack.CARD_YOFFSET = 0, 0
-            s.rows.append(stack)
-            x += l.XS
-        x, y = l.XM+2*l.XS, l.YM+l.YS
-        for i in range(8):
-            stack = OpenStack(x, y, self, max_accept=0)
-            stack.CARD_XOFFSET, stack.CARD_YOFFSET = 0, l.YOFFSET
-            s.reserves.append(stack)
-            x += l.XS
-        s.talon = KingsdownEights_Talon(l.XM, l.YM, self, max_rounds=1)
-        l.createText(s.talon, "se")
-
-        # define stack-groups
-        l.defaultStackGroups()
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()
-
-    shallHighlightMatch = Game._shallHighlightMatch_AC
-
-
 # register the game
 registerGame(GameInfo(303, Tournament, "Tournament",
                       GI.GT_2DECK_TYPE, 2, 2, GI.SL_MOSTLY_LUCK,
                       altnames=("Marechal Saxe", ),))
-registerGame(GameInfo(386, KingsdownEights, "Kingsdown Eights",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))

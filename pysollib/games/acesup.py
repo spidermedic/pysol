@@ -33,9 +33,8 @@ from pysollib.stack import \
     RK_RowStack, \
     Spider_RK_Foundation, \
     Stack, \
-    StackWrapper, \
-    isRankSequence
-from pysollib.util import ACE, ANY_RANK, ANY_SUIT, NO_RANK
+    StackWrapper
+from pysollib.util import ACE, ANY_RANK, ANY_SUIT
 
 
 # ************************************************************************
@@ -134,93 +133,6 @@ class AcesUp(Game):
 # ************************************************************************
 # * Perpetual Motion
 # ************************************************************************
-
-class PerpetualMotion_Talon(DealRowTalonStack):
-    def canDealCards(self):
-        # FIXME: this is to avoid loops in the demo
-        if self.game.demo and self.game.moves.index >= 500:
-            return False
-        return not self.game.isGameWon()
-
-    def dealCards(self, sound=False):
-        if self.cards:
-            return DealRowTalonStack.dealCards(self, sound=sound)
-        if sound:
-            self.game.startDealSample()
-        game, num_cards = self.game, len(self.cards)
-        for r in reversed(game.s.rows):
-            while r.cards:
-                num_cards = num_cards + 1
-                game.moveMove(1, r, self, frames=4)
-                if self.cards[-1].face_up:
-                    game.flipMove(self)
-        assert len(self.cards) == num_cards
-        n = DealRowTalonStack.dealCards(self, sound=False)
-        if sound:
-            self.game.stopSamples()
-        return n
-
-
-class PerpetualMotion_Foundation(AbstractFoundationStack):
-    def acceptsCards(self, from_stack, cards):
-        if not AbstractFoundationStack.acceptsCards(self, from_stack, cards):
-            return False
-        return isRankSequence(cards, dir=0)
-
-
-class PerpetualMotion_RowStack(RK_RowStack):
-    def canDropCards(self, stacks):
-        pile = self.getPile()
-        if not pile or len(pile) != 4:
-            return (None, 0)
-        for s in stacks:
-            if s is not self and s.acceptsCards(self, pile):
-                return (s, 4)
-        return (None, 0)
-
-
-class PerpetualMotion(Game):
-
-    #
-    # game layout
-    #
-
-    def createGame(self, **layout):
-        # create layout
-        l, s = Layout(self), self.s
-
-        # set window
-        self.setSize(l.XM + 7*l.XS, l.YM + 4*l.YS)
-
-        # create stacks
-        x, y, = l.XM, l.YM
-        s.talon = PerpetualMotion_Talon(x, y, self, max_rounds=-1)
-        l.createText(s.talon, "s")
-        x = x + 3*l.XS//2
-        for i in range(4):
-            s.rows.append(
-                PerpetualMotion_RowStack(x, y, self, dir=0, base_rank=NO_RANK))
-            x = x + l.XS
-        x = l.XM + 6*l.XS
-        stack = PerpetualMotion_Foundation(x, y, self, ANY_SUIT,
-                                           base_rank=ANY_RANK,
-                                           max_cards=52, max_move=0,
-                                           min_accept=4, max_accept=4)
-        l.createText(stack, "s")
-        s.foundations.append(stack)
-
-        # define stack-groups
-        l.defaultStackGroups()
-
-    #
-    # game overrides
-    #
-
-    def startGame(self):
-        self._startAndDealRow()
-
-    def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return card1.rank == card2.rank
 
 
 class Cover_RowStack(MonteCarlo_RowStack):
@@ -334,8 +246,5 @@ class TabbyCat(Game):
 registerGame(GameInfo(903, AcesUp, "Aces Up",                   # was: 52
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK,
                       altnames=("Aces High", "Drivel", "Discard")))
-registerGame(GameInfo(130, PerpetualMotion, "Perpetual Motion",
-                      GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK,
-                      altnames=("First Law", "Narcotic")))
 registerGame(GameInfo(756, TabbyCat, "Tabby Cat",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_SKILL))

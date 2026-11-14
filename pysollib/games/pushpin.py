@@ -315,9 +315,6 @@ class Accordion2Deck(Accordion2):
 # Hint should reveal a valid move, but some intelligence should be added.
 
 
-registerGame(GameInfo(287, PushPin, "Push Pin",
-                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK,
-                      altnames=('Queens')))
 registerGame(GameInfo(772, Accordion2, "Accordion",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_SKILL,
                       altnames=('Idle Year', 'Methuselah', 'Tower of Babel',

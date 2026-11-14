@@ -27,14 +27,12 @@ from pysollib.hint import CautiousDefaultHint
 from pysollib.layout import Layout
 from pysollib.pysoltk import MfxCanvasText
 from pysollib.stack import \
-    DealRowTalonStack, \
     InitialDealTalonStack, \
     InvisibleStack, \
     RK_RowStack, \
     SS_FoundationStack, \
-    SS_RowStack, \
     WasteStack
-from pysollib.util import JACK, KING, QUEEN, RANKS
+from pysollib.util import KING, RANKS
 
 
 class GrandfathersClock_Hint(CautiousDefaultHint):
@@ -125,125 +123,6 @@ class GrandfathersClock(Game):
     def getAutoStacks(self, event=None):
         # disable auto drop - this would ruin the whole gameplay
         return ((), (), ())
-
-
-# ************************************************************************
-# * Big Ben
-# ************************************************************************
-
-class BigBen_Talon(DealRowTalonStack):
-
-    def dealCards(self, sound=False):
-        if not self.cards:
-            return 0
-        rows = [s for s in self.game.s.rows if len(s.cards) < 3]
-        if not rows:
-            # deal to the waste
-            if sound and not self.game.demo:
-                self.game.playSample("dealwaste")
-            self.game.flipAndMoveMove(self, self.game.s.waste)
-            return 1
-        # deal to the rows
-        if sound and self.game.app.opt.animations:
-            self.game.startDealSample()
-        ncards = 0
-        while rows:
-            n = self.dealRowAvail(rows=rows, sound=False)
-            if not n:
-                break
-            ncards += n
-            rows = [s for s in self.game.s.rows if len(s.cards) < 3]
-        if sound:
-            self.game.stopSamples()
-        return ncards
-
-
-class BigBen_RowStack(SS_RowStack):
-    def acceptsCards(self, from_stack, cards):
-        if not SS_RowStack.acceptsCards(self, from_stack, cards):
-            return False
-        if len(self.cards) < 3:
-            return False
-        return True
-
-
-class BigBen(Game):
-    Hint_Class = CautiousDefaultHint
-
-    def createGame(self):
-        l, s = Layout(self), self.s
-        self.setSize(l.XM+12*l.XS, l.YM+5.5*l.YS)
-
-        y = l.YM
-        for i in range(2):
-            x = l.XM
-            for j in range(6):
-                s.rows.append(BigBen_RowStack(x, y, self, max_move=1, mod=13))
-                x += l.XS
-            y += 2.75*l.YS
-
-        x0, y0 = l.XM+6*l.XS, l.YM
-        rank = 1
-        for xx, yy in (
-            (0,   1.5),
-            (0.5, 0.5),
-            (1.5, 0.15),
-            (2.5, 0),
-            (3.5, 0.15),
-            (4.5, 0.5),
-            (5,   1.5),
-            (4.5, 2.5),
-            (3.5, 2.85),
-            (2.5, 3),
-            (1.5, 2.85),
-            (0.5, 2.5),
-                ):
-            x = int(x0 + xx*l.XS)
-            y = int(y0 + yy*l.YS)
-            suit = (3, 0, 2, 1)[rank % 4]
-            max_cards = 8 if rank <= 4 else 9
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=suit,
-                                 max_cards=max_cards, base_rank=rank,
-                                 mod=13, max_move=0))
-            rank += 1
-
-        x, y = self.width-l.XS, self.height-l.YS
-        s.talon = BigBen_Talon(x, y, self, max_rounds=1)
-        l.createText(s.talon, 'n')
-        x -= l.XS
-        s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, 'n')
-
-        l.defaultStackGroups()
-
-    def _shuffleHook(self, cards):
-        # move clock cards to top of the Talon (i.e. first cards to be dealt)
-        C, S, H, D = list(range(4))           # suits
-        t = [(1, C), (2, H), (3, S), (4, D), (5, C), (6, H),
-             (7, S), (8, D), (9, C), (JACK, H), (QUEEN, S), (KING, D)]
-        clocks = []
-        for c in cards[:]:
-            if (c.rank, c.suit) in t:
-                t.remove((c.rank, c.suit))
-                cards.remove(c)
-                clocks.append(c)
-            if not t:
-                break
-        # sort clocks reverse by rank
-        clocks.sort(key=lambda x: -x.rank)
-        return cards+clocks
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow(rows=self.s.foundations, frames=4)
-        for i in range(3):
-            self.s.talon.dealRow(frames=4)
-
-    def _autoDeal(self, sound=True):
-        # don't deal a card to the waste if the waste is empty
-        return 0
-
-    shallHighlightMatch = Game._shallHighlightMatch_SSW
 
 
 # ************************************************************************
@@ -482,9 +361,6 @@ class Clock(Game):
 # register the game
 registerGame(GameInfo(261, GrandfathersClock, "Grandfather's Clock",
                       GI.GT_1DECK_TYPE | GI.GT_OPEN, 1, 0, GI.SL_BALANCED))
-registerGame(GameInfo(697, BigBen, "Big Ben",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED,
-                      altnames=("Father Time")))
 registerGame(GameInfo(737, Clock, "Clock",
                       GI.GT_1DECK_TYPE | GI.GT_CHILDREN, 1, 0, GI.SL_LUCK,
                       altnames=("Travellers", "Sundial")))

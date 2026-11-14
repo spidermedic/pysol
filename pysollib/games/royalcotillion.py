@@ -566,10 +566,6 @@ class FourWinds(Game):
             lambda c: (c.rank == ACE, (c.deck, c.suit)))
 
 
-class BoxingTheCompass(FourWinds):
-    pass
-
-
 # register the game
 registerGame(GameInfo(54, RoyalCotillion, "Royal Cotillion",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_LUCK,
@@ -587,5 +583,3 @@ registerGame(GameInfo(443, Twenty, "Twenty",
                       GI.GT_NUMERICA, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(675, FourWinds, "Four Winds",
                       GI.GT_1DECK_TYPE, 1, 1, GI.SL_BALANCED))
-registerGame(GameInfo(676, BoxingTheCompass, "Boxing the Compass",
-                      GI.GT_2DECK_TYPE, 2, 1, GI.SL_BALANCED))

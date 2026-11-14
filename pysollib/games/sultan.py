@@ -23,19 +23,15 @@
 
 from pysollib.game import Game
 from pysollib.gamedb import GI, GameInfo, registerGame
-from pysollib.hint import CautiousDefaultHint
 from pysollib.layout import Layout
 from pysollib.stack import \
-    AbstractFoundationStack, \
     BasicRowStack, \
     DealRowTalonStack, \
     InitialDealTalonStack, \
     OpenStack, \
     RK_FoundationStack, \
-    RK_RowStack, \
     ReserveStack, \
     SS_FoundationStack, \
-    Stack, \
     WasteStack, \
     WasteTalonStack
 from pysollib.util import ACE, ANY_SUIT, JACK, KING, QUEEN
@@ -118,53 +114,6 @@ class Sultan(Game):
 
     def getAutoStacks(self, event=None):
         return (self.sg.dropstacks, (), self.sg.dropstacks)
-
-
-# ************************************************************************
-# * Captive Queens
-# ************************************************************************
-
-class CaptiveQueens(Game):
-
-    def createGame(self):
-
-        l, s = Layout(self), self.s
-        self.setSize(l.XM+5.5*l.XS, l.YM+3*l.YS)
-
-        x, y = l.XM, l.YM+l.YS//2
-        s.talon = WasteTalonStack(x, y, self, max_rounds=3)
-        l.createText(s.talon, "se")
-        l.createRoundText(s.talon, 'nn')
-        y += l.YS
-        s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, "se")
-
-        x, y = l.XM+1.5*l.XS, l.YM
-        for i in range(4):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i,
-                                 mod=13, max_cards=6, base_rank=4, dir=-1))
-            x += l.XS
-
-        x, y = l.XM+1.5*l.XS, l.YM+l.YS
-        for i in range(4):
-            s.foundations.append(AbstractFoundationStack(x, y, self, suit=i,
-                                 max_cards=1, max_move=0, base_rank=QUEEN))
-            x += l.XS
-
-        x, y = l.XM+1.5*l.XS, l.YM+2*l.YS
-        for i in range(4):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i,
-                                 mod=13, max_cards=6, base_rank=5))
-            x += l.XS
-
-        l.defaultStackGroups()
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealCards()
-
-    def isGameWon(self):
-        return (len(self.s.talon.cards) + len(self.s.waste.cards)) == 0
 
 
 # ************************************************************************
@@ -349,134 +298,13 @@ class Matrimony(Game):
         return Game.getSnapshotHash(self) + str(self.s.talon.round)
 
 
-# ************************************************************************
-# * Picture Patience
-# ************************************************************************
-
-class PicturePatience(Game):
-
-    def createGame(self, max_rounds=1):
-
-        l, s = Layout(self), self.s
-        w, h = 3*l.XM+5*l.XS, l.YM+4*l.YS
-        if max_rounds > 1:
-            h += (2 * l.TEXT_HEIGHT) + l.TEXT_MARGIN
-        self.setSize(w, h)
-
-        x, y = l.XM, l.YM
-        for i in range(4):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i))
-            y += l.YS
-        x, y = 3*l.XM+4*l.XS, l.YM
-        for i in range(4):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i,
-                                                    base_rank=KING, dir=-1))
-            y += l.YS
-        y = l.YM
-        for i in range(3):
-            x = 2*l.XM+l.XS
-            for j in range(3):
-                s.rows.append(BasicRowStack(x, y, self,
-                                            max_cards=1, max_accept=1))
-                x += l.XS
-            y += l.YS
-        x, y = 2*l.XM+l.XS+l.XS//2, l.YM+3*l.YS
-        if max_rounds > 1:
-            y += l.TEXT_HEIGHT
-        s.talon = WasteTalonStack(x, y, self, max_rounds=max_rounds)
-        x += l.XS
-        s.waste = WasteStack(x, y, self)
-        if max_rounds > 1:
-            l.createText(s.talon, 's')
-            l.createRoundText(s.talon, 'n')
-            l.createText(s.waste, 's')
-        else:
-            l.createText(s.talon, 'sw')
-            l.createText(s.waste, 'se')
-
-        l.defaultStackGroups()
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()
-
-    def fillStack(self, stack):
-        if stack in self.s.rows and not stack.cards:
-            if not self.s.waste.cards:
-                self.s.talon.dealCards()
-            if self.s.waste.cards:
-                self.s.waste.moveMove(1, stack)
-
-
-# ************************************************************************
-# * Corner Suite
-# ************************************************************************
-
-class CornerSuite_RowStack(RK_RowStack):
-    def acceptsCards(self, from_stack, cards):
-        if not RK_RowStack.acceptsCards(self, from_stack, cards):
-            return False
-        if not self.cards:
-            return from_stack is self.game.s.waste
-        return True
-    getBottomImage = Stack._getReserveBottomImage
-
-
-class CornerSuite(Game):
-    Hint_Class = CautiousDefaultHint
-
-    def createGame(self):
-        l, s = Layout(self), self.s
-        self.setSize(l.XM+5*l.XS, l.YM+5*l.YS)
-
-        suit = 0
-        for x, y in ((0, 0), (4, 0), (0, 4), (4, 4)):
-            x, y = l.XM+x*l.XS, l.YM+y*l.YS
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=suit))
-            suit += 1
-
-        x, y = l.XM+3*l.XS//2, l.YM
-        s.talon = WasteTalonStack(x, y, self, max_rounds=1)
-        l.createText(s.talon, 'nw')
-        x += l.XS
-        s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, 'ne')
-
-        y = l.YM+l.YS
-        for i in range(3):
-            x = l.XM+l.XS
-            for j in range(3):
-                stack = CornerSuite_RowStack(x, y, self, max_move=1)
-                s.rows.append(stack)
-                stack.CARD_XOFFSET, stack.CARD_YOFFSET = 0, 0
-                x += l.XS
-            y += l.YS
-
-        l.defaultStackGroups()
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealCards()
-
-    shallHighlightMatch = Game._shallHighlightMatch_RK
-
-
 # register the game
 registerGame(GameInfo(330, Sultan, "Sultan",
                       GI.GT_2DECK_TYPE, 2, 2, GI.SL_MOSTLY_LUCK,
                       altnames=("Sultan of Turkey",
                                 "Emperor of Germany")))
-registerGame(GameInfo(410, CaptiveQueens, "Captive Queens",
-                      GI.GT_1DECK_TYPE, 1, 2, GI.SL_LUCK,
-                      altnames=("Quadrille", "La Francaise",
-                                "Partners")))
 registerGame(GameInfo(423, LadyOfTheManor, "Lady of the Manor",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_LUCK,
                       altnames=("Vassal", "La Chatelaine")))
 registerGame(GameInfo(424, Matrimony, "Matrimony",
                       GI.GT_2DECK_TYPE, 2, 16, GI.SL_MOSTLY_LUCK))
-registerGame(GameInfo(477, CornerSuite, "Corner Suite",
-                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
-registerGame(GameInfo(598, PicturePatience, "Picture Patience",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_LUCK))
