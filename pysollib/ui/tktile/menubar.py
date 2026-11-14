@@ -726,7 +726,7 @@ class PysolMenubarTkCommon:
             app=self.app, gameid=self.game.id)
         return self._mSelectGameDialog(d)
 
-    def mSelectGameDialogWithPreview(self, *event, initial_tab=None):
+    def mSelectGameDialogWithPreview(self, *event):
         if self._cancelDrag(break_pause=False):
             return
         self.game.setCursor(cursor=CURSOR_WATCH)
@@ -741,10 +741,10 @@ class PysolMenubarTkCommon:
         if not self.game.pause:
             self.game.doPause()
             self.wasPaused = True
-        d = self._calcSelectGameDialogWithPreview()(
+        d = self._calcSelectGameDialog()(
             self.top, title="Select game",
             app=self.app, gameid=self.game.id,
-            bookmark=bookmark, initial_tab=initial_tab)
+            bookmark=bookmark)
         return self._mSelectGameDialog(d)
 
     #

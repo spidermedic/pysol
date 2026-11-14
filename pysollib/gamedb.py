@@ -168,10 +168,6 @@ class GI:
         _gen_select(title="Miscellaneous", game_type=GT_MISC_TYPE),
     )
 
-    SELECT_ORIGINAL_GAME_BY_TYPE = (
-        ("French", lambda gi, gf=GT_ORIGINAL: gi.si.game_flags & gf),
-    )
-
     SELECT_SPECIAL_GAME_BY_TYPE = (
         ("Cribbage",
             lambda gi, gt=GT_CRIBBAGE_TYPE: gi.si.game_type == gt),

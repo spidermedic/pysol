@@ -49,10 +49,6 @@ class PysolMenubarTk(PysolMenubarTkCommon):
         from .selectgame import SelectGameDialog
         return SelectGameDialog
 
-    def _calcSelectGameDialogWithPreview(self):
-        from .selectgame import SelectGameDialogWithPreview
-        return SelectGameDialogWithPreview
-
     def _calc_MfxMessageDialog(self):
         return MfxMessageDialog
 

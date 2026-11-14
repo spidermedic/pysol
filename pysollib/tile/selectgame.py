@@ -24,189 +24,25 @@
 import os
 import tkinter
 import tkinter.ttk as ttk
-from collections import UserList
 
 from pysollib.gamedb import GI
 from pysollib.images import Images, SubsampledImages
 from pysollib.mfxutil import KwStruct, Struct, destruct
 from pysollib.resource import CSI, getNaturalSortKey
-from pysollib.ui.tktile.selecttree import SelectDialogTreeData
 from pysollib.ui.tktile.tkutil import bind, unbind_destroy
 
-from .selecttree import SelectDialogTreeCanvas
-from .selecttree import SelectDialogTreeLeaf, SelectDialogTreeNode
 from .tkwidget import MfxDialog, MfxScrolledCanvas, PysolButton, \
-                      PysolCheckbutton, PysolCombo, PysolEntry, \
-                      PysolNotebook
-
-# ************************************************************************
-# * Nodes
-# ************************************************************************
-
-
-class SelectGameLeaf(SelectDialogTreeLeaf):
-    pass
-
-
-class SelectGameNode(SelectDialogTreeNode):
-    def _getContents(self):
-        contents = []
-        if isinstance(self.select_func, UserList):
-            # key/value pairs
-            for id, name in self.select_func:
-                if id and name:
-                    node = SelectGameLeaf(self.tree, self, name, key=id)
-                    contents.append(node)
-        else:
-            for gi in self.tree.data.all_games_gi:
-                if gi and self.select_func is None:
-                    # All games
-                    # name = '%s (%s)' % (gi.name, CSI.TYPE_NAME[gi.category])
-                    name = gi.name
-                    node = SelectGameLeaf(self.tree, self, name, key=gi.id)
-                    contents.append(node)
-                elif gi and self.select_func(gi):
-                    name = gi.name
-                    node = SelectGameLeaf(self.tree, self, name, key=gi.id)
-                    contents.append(node)
-        return contents or self.tree.data.no_games
-
-
-# ************************************************************************
-# * Tree database
-# ************************************************************************
-
-class SelectGameData(SelectDialogTreeData):
-    def __init__(self, app):
-        SelectDialogTreeData.__init__(self)
-        self.all_games_gi = list(map(
-            app.gdb.get,
-            app.gdb.getGamesIdSortedByName()))
-        self.no_games = [SelectGameLeaf(None, None, "(no games)", None), ]
-        #
-        s_original = None
-        gg = []
-        for name, select_func in GI.SELECT_ORIGINAL_GAME_BY_TYPE:
-            if name is None or not list(filter(
-                    select_func, self.all_games_gi)):
-                continue
-            gg.append(SelectGameNode(None, name, select_func))
-        if gg:
-            s_original = SelectGameNode(None, "Original", tuple(gg))
-        #
-        ul_alternate_names = UserList(
-            list(app.gdb.getGamesTuplesSortedByAlternateName()))
-        #
-        others = [_f for _f in (
-            SelectGameNode(None, "Alternate Names", ul_alternate_names),
-            SelectGameNode(None, "Other Categories", (
-                SelectGameNode(None, "Games for Children (very easy)",
-                               lambda gi: gi.si.game_flags & GI.GT_CHILDREN),
-                SelectGameNode(None, "Games with Scoring",
-                               lambda gi: gi.si.game_flags & GI.GT_SCORE),
-                SelectGameNode(None, "Games with Stripped Decks",
-                               lambda gi: gi.si.game_flags & GI.GT_STRIPPED),
-                SelectGameNode(None, "Open Games (all cards visible)",
-                               lambda gi: gi.si.game_flags & GI.GT_OPEN),
-                SelectGameNode(None, "Relaxed Variants",
-                               lambda gi: gi.si.game_flags & GI.GT_RELAXED),
-            )),
-            s_original,
-        ) if _f]
-        others.sort(key=lambda n: n.text.lower())
-        self.rootnodes = [
-            SelectGameNode(None, "All Games", None, expanded=0),
-            SelectGameNode(None, "Popular Games",
-                           lambda gi: gi.si.game_flags & GI.GT_POPULAR),
-            SelectGameLeaf(None, None, "-" * 28, None),
-        ] + others
-
-
-# ************************************************************************
-# * Canvas that shows the tree
-# ************************************************************************
-
-class SelectGameTreeWithPreview(SelectDialogTreeCanvas):
-    data = None
-
-
-class SelectGameTree(SelectGameTreeWithPreview):
-    def singleClick(self, event=None):
-        self.doubleClick(event)
-
+                      PysolCheckbutton, PysolCombo, PysolEntry
 
 # ************************************************************************
 # * Dialog
 # ************************************************************************
+
+ALL_CATEGORIES = "All categories"
+
 
 class SelectGameDialog(MfxDialog):
-    Tree_Class = SelectGameTree
-    TreeDataHolder_Class = SelectGameTreeWithPreview
-    TreeData_Class = SelectGameData
-
-    def __init__(self, parent, title, app, gameid, **kw):
-        kw = self.initKw(kw)
-        MfxDialog.__init__(self, parent, title, kw.resizable, kw.default)
-        top_frame, bottom_frame = self.createFrames(kw)
-
-        self.createBitmaps(top_frame, kw)
-        #
-        self.app = app
-        self.gameid = gameid
-        self.random = None
-        if self.TreeDataHolder_Class.data is None:
-            self.TreeDataHolder_Class.data = self.TreeData_Class(app)
-        #
-        self.top.wm_minsize(200, 200)
-        font = app.getFont("default")
-        self.tree = self.Tree_Class(self, top_frame, key=gameid,
-                                    font=font, default=kw.default)
-        self.tree.frame.pack(fill='both', expand=True,
-                             padx=kw.padx, pady=kw.pady)
-        #
-        focus = self.createButtons(bottom_frame, kw)
-        focus = self.tree.frame
-        self.mainloop(focus, kw.timeout)
-
-    def initKw(self, kw):
-        kw = KwStruct(kw,
-                      strings=(None, None, "&Cancel",), default=0,
-                      resizable=True,
-                      separator=True,
-                      )
-        return MfxDialog.initKw(self, kw)
-
-    def destroy(self):
-        self.app = None
-        self.tree.updateNodesWithTree(self.tree.rootnodes, None)
-        self.tree.destroy()
-        MfxDialog.destroy(self)
-
-    def mDone(self, button):
-        if button == 0:                 # Ok or double click
-            self.gameid = self.tree.selection_key
-            self.tree.n_expansions = 1  # save xyview in any case
-        if button == 10:                # Rules
-            doc = self.app.getGameRulesFilename(self.tree.selection_key)
-            if not doc:
-                return
-            dir = os.path.join("html", "rules")
-            from pysollib.help import help_html
-            help_html(self.app, doc, dir, self.top)
-            self.top.grab_release()  # Don't want the help window appear frozen
-            return
-        MfxDialog.mDone(self, button)
-
-
-# ************************************************************************
-# * Dialog
-# ************************************************************************
-
-class SelectGameDialogWithPreview(SelectGameDialog):
-    Tree_Class = SelectGameTreeWithPreview
-
-    def __init__(self, parent, title, app, gameid, bookmark=None,
-                 initial_tab=None, **kw):
+    def __init__(self, parent, title, app, gameid, bookmark=None, **kw):
         kw = self.initKw(kw)
         MfxDialog.__init__(self, parent, title, kw.resizable, kw.default)
         top_frame, bottom_frame = self.createFrames(kw)
@@ -220,8 +56,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         self.cardset = self.app.cardset.copy()
         self.cardset_cache = {}
         self.random = None
-        if self.TreeDataHolder_Class.data is None:
-            self.TreeDataHolder_Class.data = self.TreeData_Class(app)
+        self.selected_gameid = gameid
         #
 
         pw = parent.winfo_width()
@@ -231,7 +66,6 @@ class SelectGameDialogWithPreview(SelectGameDialog):
 
         h = int(ph * .8)
         w = int(pw * .8)
-        w1 = int(min(275, pw / 2.5))
         geometry = ("%dx%d+%d+%d" % (w, h, px + ((pw - w) / 2),
                                      py + (int((ph - h) / 1.5))))
         self.top.wm_minsize(400, 200)
@@ -250,21 +84,9 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         paned_window.add(left_frame)
         paned_window.add(right_frame)
 
-        notebook = PysolNotebook(left_frame)
-        notebook.pack(expand=True, fill='both')
-        tree_frame = ttk.Frame(notebook)
-        notebook.add(tree_frame, text='Tree View')
-        search_frame = ttk.Frame(notebook)
-        notebook.add(search_frame, text='Search')
+        search_frame = ttk.Frame(left_frame)
+        search_frame.pack(expand=True, fill='both')
 
-        # Tree
-        font = app.getFont("default")
-        self.tree = self.Tree_Class(self, tree_frame, key=gameid,
-                                    default=kw.default, font=font,
-                                    width=w1)
-        self.tree.frame.pack(padx=padx, pady=pady, expand=True, fill='both')
-
-        # Search
         searchbox = ttk.Frame(search_frame)
         searchText = tkinter.StringVar()
         self.list_searchlabel = tkinter.Label(searchbox, text="Search:",
@@ -284,6 +106,17 @@ class SelectGameDialogWithPreview(SelectGameDialog):
                                   padx=padx, pady=pady, ipadx=1)
         searchText.trace_add('write', self.basicSearch)
 
+        # category filter
+        self.categoryVar = tkinter.StringVar(value=ALL_CATEGORIES)
+        categories = [ALL_CATEGORIES] + sorted(
+            set(GI.TYPE_NAMES.values()), key=str.lower)
+        self.categoryCombo = PysolCombo(
+            searchbox, values=categories, fieldname="Category:",
+            textvariable=self.categoryVar, state='readonly')
+        self.categoryVar.trace_add('write', self.categoryChanged)
+        self.categoryCombo.pack(side="top", fill='both',
+                                padx=padx, pady=pady, ipadx=1)
+
         searchbox.pack(side="top", fill="both")
 
         self.list_scrollbar = tkinter.Scrollbar(search_frame)
@@ -297,15 +130,10 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         bind(self.list, '<<ListboxSelect>>', self.selectSearchResult)
         bind(self.list, '<FocusIn>',
              lambda e: self.app.speech.speak("Games list"))
-        bind(self.list, '<FocusOut>',
-             lambda e: self.list.selection_clear(0, 'end'))
 
         self.list.config(yscrollcommand=self.list_scrollbar.set)
         self.list_scrollbar.config(command=self.list.yview)
-
-        self.notebook = notebook
-        search_focus = notebook.apply_initial_tab(
-            initial_tab, search_frame, self.list_searchtext)
+        self.showGameInList(gameid)
 
         # LabelFrame
         info_frame = ttk.LabelFrame(right_frame, text='About game')
@@ -348,8 +176,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         self.preview_game = None
         self.preview_app = None
         self.updatePreview(gameid, animations=0)
-        if search_focus is not None:
-            focus = search_focus
+        focus = self.list_searchtext
         self.mainloop(focus, kw.timeout, geometry=geometry)
 
     def initKw(self, kw):
@@ -358,13 +185,29 @@ class SelectGameDialogWithPreview(SelectGameDialog):
                                "&Select", "&Cancel",),
                       default=0,
                       )
-        return SelectGameDialog.initKw(self, kw)
+        kw = KwStruct(kw, separator=True)
+        return MfxDialog.initKw(self, kw)
 
     def destroy(self):
         self.deletePreview(destroy=1)
         self.cardset_cache.clear()
         self.preview.unbind_all()
-        SelectGameDialog.destroy(self)
+        self.app = None
+        MfxDialog.destroy(self)
+
+    def mDone(self, button):
+        if button == 0:                 # Ok or double click
+            self.gameid = self.selected_gameid
+        if button == 10:                # Rules
+            doc = self.app.getGameRulesFilename(self.selected_gameid)
+            if not doc:
+                return
+            dir = os.path.join("html", "rules")
+            from pysollib.help import help_html
+            help_html(self.app, doc, dir, self.top)
+            self.top.grab_release()  # Don't want the help window appear frozen
+            return
+        MfxDialog.mDone(self, button)
 
     def deletePreview(self, destroy=0):
         self.preview_key = -1
@@ -388,6 +231,21 @@ class SelectGameDialogWithPreview(SelectGameDialog):
             if self.preview_app:
                 destruct(self.preview_app)
             self.preview_app = None
+
+    def categoryChanged(self, *args):
+        category = self.categoryVar.get()
+        self.criteria.type = "" if category == ALL_CATEGORIES else category
+        self.performSearch()
+
+    def showGameInList(self, gameid):
+        gi = self.app.gdb.get(gameid)
+        if gi is None:
+            return
+        names = self.list.get(0, 'end')
+        if gi.name in names:
+            i = names.index(gi.name)
+            self.list.selection_set(i)
+            self.list.see(i)
 
     def basicSearch(self, *args):
         self.updateSearchList(self.list_searchtext.get())
@@ -524,6 +382,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
                                      self.criteria)
         if d.status == 0 and d.button == 0:
             self.criteria = SearchCriteria()
+            self.categoryVar.set(ALL_CATEGORIES)
             self.performSearch()
 
         if d.status == 0 and d.button == 1:
@@ -536,6 +395,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
             self.criteria.category = d.category.get()
             self.criteria.subcategory = d.subcategory.get()
             self.criteria.type = d.type.get()
+            self.categoryVar.set(self.criteria.type or ALL_CATEGORIES)
             self.criteria.skill = d.skill.get()
             self.criteria.decks = d.decks.get()
             self.criteria.redeals = d.redeals.get()
@@ -564,8 +424,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         sel = self.list.get(self.list.curselection())
         game = self.app.gdb.getGameByName(sel)
         self.list.update_idletasks()
-        self.tree.n_selections += 1
-        self.tree.updateSelection(game)
+        self.selected_gameid = game
         self.updatePreview(game)
         self.speakGameInfo(sel)
         self.list["cursor"] = oldcur
