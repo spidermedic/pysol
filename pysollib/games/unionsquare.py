@@ -135,6 +135,6 @@ class UnionSquare(pysollib.game.StartDealRowAndCards, Game):
 
 # register the game
 registerGame(GameInfo(35, UnionSquare, "Union Square",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_SKILL,
+                      GI.GT_NAPOLEON, 2, 0, GI.SL_MOSTLY_SKILL,
                       altnames=('British Square',),
                       ))

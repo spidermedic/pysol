@@ -300,11 +300,11 @@ class Matrimony(Game):
 
 # register the game
 registerGame(GameInfo(330, Sultan, "Sultan",
-                      GI.GT_2DECK_TYPE, 2, 2, GI.SL_MOSTLY_LUCK,
+                      GI.GT_MISC_TYPE, 2, 2, GI.SL_MOSTLY_LUCK,
                       altnames=("Sultan of Turkey",
                                 "Emperor of Germany")))
 registerGame(GameInfo(423, LadyOfTheManor, "Lady of the Manor",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_LUCK,
+                      GI.GT_MISC_TYPE, 2, 0, GI.SL_MOSTLY_LUCK,
                       altnames=("Vassal", "La Chatelaine")))
 registerGame(GameInfo(424, Matrimony, "Matrimony",
-                      GI.GT_2DECK_TYPE, 2, 16, GI.SL_MOSTLY_LUCK))
+                      GI.GT_MISC_TYPE, 2, 16, GI.SL_MOSTLY_LUCK))

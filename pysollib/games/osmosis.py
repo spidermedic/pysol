@@ -167,5 +167,5 @@ class Osmosis(Osmium):
 
 # register the game
 registerGame(GameInfo(715, Osmosis, "Osmosis",
-                      GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK,
+                      GI.GT_MISC_TYPE, 1, -1, GI.SL_MOSTLY_LUCK,
                       altnames=("Treasure Trove",)))

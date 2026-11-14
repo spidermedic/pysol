@@ -568,18 +568,18 @@ class FourWinds(Game):
 
 # register the game
 registerGame(GameInfo(54, RoyalCotillion, "Royal Cotillion",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_LUCK,
+                      GI.GT_MISC_TYPE, 2, 0, GI.SL_LUCK,
                       altnames=("Lords and Ladies",)))
 registerGame(GameInfo(234, Alhambra, "Alhambra",
-                      GI.GT_2DECK_TYPE, 2, 2, GI.SL_BALANCED))
+                      GI.GT_MISC_TYPE, 2, 2, GI.SL_BALANCED))
 registerGame(GameInfo(97, Carpet, "Carpet",
-                      GI.GT_1DECK_TYPE | GI.GT_CHILDREN, 1, 0,
+                      GI.GT_MISC_TYPE | GI.GT_CHILDREN, 1, 0,
                       GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(391, BritishConstitution, "British Constitution",
-                      GI.GT_2DECK_TYPE | GI.GT_STRIPPED, 2, 0, GI.SL_BALANCED,
+                      GI.GT_MISC_TYPE | GI.GT_STRIPPED, 2, 0, GI.SL_BALANCED,
                       ranks=list(range(11)),  # without Queens and Kings
                       altnames=("Constitution",)))
 registerGame(GameInfo(443, Twenty, "Twenty",
                       GI.GT_NUMERICA, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(675, FourWinds, "Four Winds",
-                      GI.GT_1DECK_TYPE, 1, 1, GI.SL_BALANCED))
+                      GI.GT_MISC_TYPE, 1, 1, GI.SL_BALANCED))

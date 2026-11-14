@@ -104,5 +104,5 @@ class Precedence(Game):
 
 # register the game
 registerGame(GameInfo(790, Precedence, "Precedence",
-                      GI.GT_2DECK_TYPE, 2, 2, GI.SL_MOSTLY_LUCK,
+                      GI.GT_MISC_TYPE, 2, 2, GI.SL_MOSTLY_LUCK,
                       altnames=("Order of Precedence", "Succession")))

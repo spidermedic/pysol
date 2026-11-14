@@ -104,13 +104,13 @@ class SelectGameData(SelectDialogTreeData):
 
         gg = None
         if list(filter(select_mahjongg_game, self.all_games_gi)):
-            gg = SelectGameNode(None, "Mahjongg Games",
+            gg = SelectGameNode(None, "Mahjongg",
                                 select_mahjongg_game)
         g.append(gg)
         # French and Special categories go directly into the main list
         flat_nodes = list(g[0]) + list(g[1])
         if g[2]:
-            s_original = SelectGameNode(None, "Original Games",
+            s_original = SelectGameNode(None, "Original",
                                         tuple(g[2]))
         # if g[3]:
         #   s_contrib = SelectGameNode(None, "Contributed Games", tuple(g[3]))
@@ -160,8 +160,6 @@ class SelectGameData(SelectDialogTreeData):
             *flat_nodes,
             SelectGameNode(None, "Alternate Names", ul_alternate_names),
             s_mahjongg,
-            SelectGameNode(None, "Custom Games",
-                           lambda gi: gi.si.game_type == GI.GT_CUSTOM),
             SelectGameNode(None, 'by Skill Level', (
                 SelectGameNode(None, 'Luck only',
                                lambda gi: gi.skill_level == GI.SL_LUCK),
@@ -185,8 +183,6 @@ class SelectGameData(SelectDialogTreeData):
                                    lambda gi: gi.si.ncards == 52),
                     SelectGameNode(None, "64 cards",
                                    lambda gi: gi.si.ncards == 64),
-                    SelectGameNode(None, "78 cards",
-                                   lambda gi: gi.si.ncards == 78),
                     SelectGameNode(None, "104 cards",
                                    lambda gi: gi.si.ncards == 104),
                     SelectGameNode(None, "144 cards",
@@ -217,8 +213,6 @@ class SelectGameData(SelectDialogTreeData):
                                    lambda gi: gi.si.redeals == 3),
                     SelectGameNode(None, "Unlimited redeals",
                                    lambda gi: gi.si.redeals == -1),
-                    SelectGameNode(None, "Variable redeals",
-                                   lambda gi: gi.si.redeals == -2),
                     SelectGameNode(
                         None, "Other number of redeals",
                         lambda gi: gi.si.redeals not in (-2, -1, 0, 1, 2, 3)),
@@ -234,12 +228,6 @@ class SelectGameData(SelectDialogTreeData):
                                lambda gi: gi.si.game_flags & GI.GT_SCORE),
                 SelectGameNode(None, "Games with Stripped Decks",
                                lambda gi: gi.si.game_flags & GI.GT_STRIPPED),
-                SelectGameNode(None, "Games with Separate Decks",
-                               lambda gi: gi.si.game_flags &
-                               GI.GT_SEPARATE_DECKS),
-                SelectGameNode(None, "Games with Jokers",
-                               lambda gi: gi.category == GI.GC_FRENCH and
-                               gi.subcategory == GI.GS_JOKER_DECK),
                 SelectGameNode(None, "Open Games (all cards visible)",
                                lambda gi: gi.si.game_flags & GI.GT_OPEN),
                 SelectGameNode(None, "Relaxed Variants",

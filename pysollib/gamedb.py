@@ -46,10 +46,7 @@ class GI:
     GS_JOKER_DECK = CSI.SUBTYPE_JOKER_DECK
 
     # game type
-    GT_1DECK_TYPE = 0
-    GT_2DECK_TYPE = 1
-    GT_3DECK_TYPE = 2
-    GT_4DECK_TYPE = 3
+    GT_MISC_TYPE = 0
     GT_BAKERS_DOZEN = 4
     GT_BELEAGUERED_CASTLE = 5
     GT_CANFIELD = 6
@@ -69,8 +66,6 @@ class GI:
     GT_POKER_TYPE = 25
     GT_RAGLAN = 27
     GT_ROW_TYPE = 28
-    GT_SHISEN_SHO = 34
-    GT_SIMPLE_TYPE = 29
     GT_SPIDER = 30
     GT_TERRACE = 32
     GT_YUKON = 33
@@ -113,20 +108,15 @@ class GI:
         GT_PAIRING_TYPE:        "Pairing",
         GT_PICTURE_GALLERY:     "Picture Gallery",
         GT_RAGLAN:              "Raglan",
-        GT_SIMPLE_TYPE:         "Simple games",
         GT_SPIDER:              "Spider",
         GT_TERRACE:             "Terrace",
         GT_YUKON:               "Yukon",
-        GT_1DECK_TYPE:          "One-Deck games",
-        GT_2DECK_TYPE:          "Two-Deck games",
-        GT_3DECK_TYPE:          "Three-Deck games",
-        GT_4DECK_TYPE:          "Four-Deck games",
+        GT_MISC_TYPE:           "Miscellaneous",
 
         GT_MAHJONGG:            "Mahjongg",
 
         GT_CRIBBAGE_TYPE:       "Cribbage",
         GT_POKER_TYPE:          "Poker",
-        GT_SHISEN_SHO:          "Shisen-Sho",
 
         GT_CUSTOM:              "Custom",
     }
@@ -153,49 +143,43 @@ class GI:
         return (title, _callback)
 
     SELECT_GAME_BY_TYPE = (
-        _gen_select(title="Baker's Dozen type", game_type=GT_BAKERS_DOZEN),
+        _gen_select(title="Baker's Dozen", game_type=GT_BAKERS_DOZEN),
         _gen_select(
-            title="Beleaguered Castle type",
+            title="Beleaguered Castle",
             game_type=GT_BELEAGUERED_CASTLE),
-        _gen_select(title="Canfield type", game_type=GT_CANFIELD),
-        _gen_select(title="Fan type", game_type=GT_FAN_TYPE),
+        _gen_select(title="Canfield", game_type=GT_CANFIELD),
+        _gen_select(title="Fan", game_type=GT_FAN_TYPE),
         _gen_select(
-            title="Forty Thieves type", game_type=GT_FORTY_THIEVES),
-        _gen_select(title="FreeCell type", game_type=GT_FREECELL),
-        _gen_select(title="Golf type", game_type=GT_GOLF),
-        _gen_select(title="Gypsy type", game_type=GT_GYPSY),
-        _gen_select(title="Klondike type", game_type=GT_KLONDIKE),
-        _gen_select(title="Montana type", game_type=GT_MONTANA),
-        _gen_select(title="Napoleon type", game_type=GT_NAPOLEON),
-        _gen_select(title="Numerica type", game_type=GT_NUMERICA),
-        _gen_select(title="Pairing type", game_type=GT_PAIRING_TYPE),
-        _gen_select(title="Picture Gallery type",
+            title="Forty Thieves", game_type=GT_FORTY_THIEVES),
+        _gen_select(title="FreeCell", game_type=GT_FREECELL),
+        _gen_select(title="Golf", game_type=GT_GOLF),
+        _gen_select(title="Gypsy", game_type=GT_GYPSY),
+        _gen_select(title="Klondike", game_type=GT_KLONDIKE),
+        _gen_select(title="Montana", game_type=GT_MONTANA),
+        _gen_select(title="Napoleon", game_type=GT_NAPOLEON),
+        _gen_select(title="Numerica", game_type=GT_NUMERICA),
+        _gen_select(title="Pairing", game_type=GT_PAIRING_TYPE),
+        _gen_select(title="Picture Gallery",
                     game_type=GT_PICTURE_GALLERY),
-        _gen_select(title="Raglan type", game_type=GT_RAGLAN),
-        _gen_select(title="Simple games", game_type=GT_SIMPLE_TYPE),
-        _gen_select(title="Spider type", game_type=GT_SPIDER),
-        _gen_select(title="Terrace type", game_type=GT_TERRACE),
-        _gen_select(title="Yukon type", game_type=GT_YUKON),
-        _gen_select(title="One-Deck games", game_type=GT_1DECK_TYPE),
-        _gen_select(title="Two-Deck games", game_type=GT_2DECK_TYPE),
-        _gen_select(title="Three-Deck games", game_type=GT_3DECK_TYPE),
-        _gen_select(title="Four-Deck games", game_type=GT_4DECK_TYPE),
+        _gen_select(title="Raglan", game_type=GT_RAGLAN),
+        _gen_select(title="Spider", game_type=GT_SPIDER),
+        _gen_select(title="Terrace", game_type=GT_TERRACE),
+        _gen_select(title="Yukon", game_type=GT_YUKON),
+        _gen_select(title="Miscellaneous", game_type=GT_MISC_TYPE),
     )
 
     SELECT_ORIGINAL_GAME_BY_TYPE = (
-        ("French type", lambda gi, gf=GT_ORIGINAL: gi.si.game_flags & gf),
+        ("French", lambda gi, gf=GT_ORIGINAL: gi.si.game_flags & gf),
     )
 
     SELECT_CONTRIB_GAME_BY_TYPE = (
-        ("French type", lambda gi, gf=GT_CONTRIB: gi.si.game_flags & gf),
+        ("French", lambda gi, gf=GT_CONTRIB: gi.si.game_flags & gf),
     )
 
     SELECT_SPECIAL_GAME_BY_TYPE = (
-        ("Cribbage type",
+        ("Cribbage",
             lambda gi, gt=GT_CRIBBAGE_TYPE: gi.si.game_type == gt),
-        ("Poker type", lambda gi, gt=GT_POKER_TYPE: gi.si.game_type == gt),
-        ("Shisen-Sho type",
-            lambda gi, gt=GT_SHISEN_SHO: gi.si.game_type == gt),
+        ("Poker", lambda gi, gt=GT_POKER_TYPE: gi.si.game_type == gt),
     )
 
     # These obsolete gameids have been used in previous versions of

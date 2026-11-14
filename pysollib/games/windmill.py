@@ -325,13 +325,13 @@ class FourSeasons(Czarina):
 
 # register the game
 registerGame(GameInfo(30, Windmill, "Windmill",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_LUCK,
+                      GI.GT_MISC_TYPE, 2, 0, GI.SL_MOSTLY_LUCK,
                       altnames=('Propeller',)))
 registerGame(GameInfo(277, NapoleonsTomb, "Napoleon's Tomb",
-                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
+                      GI.GT_MISC_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(417, Corners, "Corners",
-                      GI.GT_1DECK_TYPE, 1, 2, GI.SL_MOSTLY_LUCK))
+                      GI.GT_MISC_TYPE, 1, 2, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(484, FourSeasons, "Four Seasons",
-                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK,
+                      GI.GT_MISC_TYPE, 1, 0, GI.SL_MOSTLY_LUCK,
                       altnames=('Corner Card', 'Vanishing Cross',
                                 'Cross Currents')))

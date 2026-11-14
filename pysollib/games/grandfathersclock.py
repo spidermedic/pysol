@@ -360,7 +360,7 @@ class Clock(Game):
 
 # register the game
 registerGame(GameInfo(261, GrandfathersClock, "Grandfather's Clock",
-                      GI.GT_1DECK_TYPE | GI.GT_OPEN, 1, 0, GI.SL_BALANCED))
+                      GI.GT_MISC_TYPE | GI.GT_OPEN, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(737, Clock, "Clock",
-                      GI.GT_1DECK_TYPE | GI.GT_CHILDREN, 1, 0, GI.SL_LUCK,
+                      GI.GT_MISC_TYPE | GI.GT_CHILDREN, 1, 0, GI.SL_LUCK,
                       altnames=("Travellers", "Sundial")))

@@ -145,4 +145,4 @@ class AcesAndKings(Game):
 
 # register the game
 registerGame(GameInfo(800, AcesAndKings, "Aces and Kings",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
+                      GI.GT_MISC_TYPE, 2, 0, GI.SL_BALANCED))

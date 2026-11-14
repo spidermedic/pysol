@@ -130,4 +130,4 @@ class Labyrinth(Game):
 # register the game
 
 # registerGame(GameInfo(400, Labyrinth, "Labyrinth",
-#                      GI.GT_1DECK_TYPE, 1, 0))
+#                      GI.GT_MISC_TYPE, 1, 0))

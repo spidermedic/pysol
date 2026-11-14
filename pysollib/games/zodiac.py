@@ -120,4 +120,4 @@ class Zodiac(Game):
 
 # register the game
 registerGame(GameInfo(467, Zodiac, "Zodiac",
-                      GI.GT_2DECK_TYPE, 2, -1, GI.SL_BALANCED))
+                      GI.GT_NAPOLEON, 2, -1, GI.SL_BALANCED))

@@ -137,5 +137,5 @@ class Tournament(Game):
 
 # register the game
 registerGame(GameInfo(303, Tournament, "Tournament",
-                      GI.GT_2DECK_TYPE, 2, 2, GI.SL_MOSTLY_LUCK,
+                      GI.GT_MISC_TYPE, 2, 2, GI.SL_MOSTLY_LUCK,
                       altnames=("Marechal Saxe", ),))

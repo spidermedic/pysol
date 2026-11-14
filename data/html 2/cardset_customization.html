@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>PySol Lite - Cardset Customization</title>
+<meta name="license" content="GNU General Public License">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+</head>
+<body text="#000000" bgcolor="#F7F3FF" link="#0000FF" vlink="#660099"
+alink="#FF0000">
+<img src="images/pysollogo03.png" alt="PySol Lite Logo">
+<br>
+
+    <h1>Cardset Customization Tutorial</h1>
+      <h2>Setting up a Cardset</h2>
+          <p>The easiest way to create a cardset would be to copy an existing cardset folder
+          of the same type in your cardsets directory.  All cardsets need a number of files to work.
+          <ul>
+          <li>An image for each card - these images should be the same format and the same size, as defined in the config.txt file (described below).
+          These files should be named something like 01s.png for the ace of spades.  The first two (or more) digits represent the rank, and the letter
+          after represents the suit.  The suits are labeled hcds in French decks or decks that use French suits (i.e. Hex A or Tarock decks), and
+          the suits are alphabetical for other decks.  The suit letter z is used for jokers or trumps.</li>
+          <li>A shade file - shade.png, for example.</li>
+          <li>At least one back image, as defined in the config.txt file below.</li>
+          <li>A config.txt file, the format described below.</li>
+          <li>A copyright file, containing copyright info.</li>
+          </ul>
+          <p>The following optional files may also be added, but are only used under certain circumstances.
+          <ul>
+          <li>Bottom images.  A number of images for the bottoms of stacks.  These are not used unless your PySol Lite install
+          does not support generating stack bottoms, or you enable them manually (currently only possible through editing the
+          options.cfg file).  Which bottoms are used depend on the cardset type.  Each bottom has a version with a suffix of
+          -n, indicating the negative bottom that gets used if the appropriate option is enabled.</li>
+          <li>Shadow images.  These will only be used if your PySol Lite install does not support auto-generated shadows.</li>
+          </ul>
+      <h2>config.txt template</h2>
+            <pre>PySolFC solitaire cardset;$A;$FMT;$B;$C;$D,$E;$F;$G;$H
+&lt;internal_name&gt;;&lt;cardset_name&gt;
+X Y D
+XOFF YOFF SXOFF SYOFF
+back01.ext
+back01.ext;back02.ext;back03.ext</pre>
+      <h2>Line 1</h2>
+          <p><b>$A:</b> The cardset version number that belongs to the number
+            of fields divided through ";" on the first line (e.g. <code>.gif;1;78;8,1016</code> &#8594; <code>$A=4</code>)</p>
+          <p>(<b>WARNING:</b> For Mahjongg, $A must always be 6 or 7 and the $F
+            field must be included in the line; however, you can put <code>0</code> in <code>$F</code> if you wish, in that case.)</p>
+          <p>(<b>NOTE:</b> $D and $E are comma separated and count for one
+            field)</p>
+          <p><b>$FMT:</b> The format of the images used - .gif, .png, .jpg, .ppm, and .bmp are supported</p>
+          <p><b>$B:</b> The type of the cardset (see types below)</p>
+          <h3>Cardsets Types:</h3>
+            <ul>
+              <li>French = 1</li>
+              <li>Mahjongg = 4</li>
+            </ul>
+            <p><b>$C:</b> The number of cards in the cardset, generally 42 or
+              52</p>
+            <p><b>$D:</b> The Style of the cardset (this field can hold one
+              or more comma separated values)</p>
+          <h3>Cardsets Styles:</h3>
+            <ul>
+              <li>Abstract = 35</li>
+              <li>Adult = 1</li>
+              <li>Animals = 2</li>
+              <li>Anime = 3</li>
+              <li>Art = 4</li>
+              <li>Cartoons = 5</li>
+              <li>Children = 6</li>
+              <li>Classic Look = 7</li>
+              <li>Collectors = 8</li>
+              <li>Computers = 9</li>
+              <li>Divination = 36</li>
+              <li>Engines = 10</li>
+              <li>Fantasy = 11</li>
+              <li>Four Color = 37</li>
+              <li>Holiday = 13</li>
+              <li>Mahjongg = 28</li>
+              <li>Monochrome = 38</li>
+              <li>Movies = 14</li>
+              <li>Music = 15</li>
+              <li>Nature = 16</li>
+              <li>Operating Systems = 17</li>
+              <li>People = 19</li>
+              <li>Places = 20</li>
+              <li>Plain = 21</li>
+              <li>Products = 22</li>
+              <li>Round Cardsets = 18</li>
+              <li>Science Fiction = 23</li>
+              <li>Sports = 24</li>
+              <li>Vehicles = 25</li>
+              <li>Video Games = 26</li>
+            </ul>
+            <p><b>$E:</b> The origin (country) of the cardset</p>
+          <h3>Cardsets Origins:</h3>
+            <ul>
+              <li>Australia = 1021</li>
+              <li>Austria = 1001</li>
+              <li>Belgium = 1019</li>
+              <li>Canada = 1010</li>
+              <li>China = 1011</li>
+              <li>Czech Republic = 1012</li>
+              <li>Denmark = 1013</li>
+              <li>England = 1003</li>
+              <li>France = 1004</li>
+              <li>Germany = 1006</li>
+              <li>Great Britain = 1014</li>
+              <li>Hungary = 1015</li>
+              <li>India = 1020</li>
+              <li>Italy = 1005</li>
+              <li>Japan = 1016</li>
+              <li>Netherlands = 1002</li>
+              <li>Portugal = 1022</li>
+              <li>Russia = 1007</li>
+              <li>Spain = 1008</li>
+              <li>Sweden = 1017</li>
+              <li>Switzerland = 1009</li>
+              <li>USA = 1018</li>
+            </ul>
+            <p><b>$F:</b> The Year the cardset was created (in the range 1000
+              to 2299)</p>
+            <p><b>$G:</b> The subtype of the cardset.  Usually 0 - for French type
+              cardsets, a value of 1 is used if there are jokers.  For Puzzle type
+              cardsets, it is the number of pieces per row/column.</p>
+            <p><b>$H:</b> Whether the cardset is a 3D Mahjongg cardset - 1 if it is, 0
+              if it isn't.  For cardsets with a version less than 7, version 6 cardsets
+              treat this value as 1, and older version cardsets treat it as 0.</p>
+      <h2>Line 2</h2>
+          <p><code>&lt;internal_name&gt;</code>: A name for PySol Lite to identify your
+            cardset (without spaces)</p>
+          <p>(<b>TIP:</b> You could add a number prefix (e.g. 123-cardset-name)
+           )</p>
+          <p><code>&lt;cardset_name&gt;</code>: Your cardset name as it should appear
+            in the cardset manager.  Note that a cardset name of more than 50 characters
+            will be truncated.</p>
+      <h2>Line 3</h2>
+          <ul>
+            <li><b>X:</b> The cards' width (the card image width)</li>
+            <li><b>Y:</b> The cards' height (the card image height)</li>
+            <li><b>D:</b> The color depth (mostly 8)</li>
+          </ul>
+      <h2>Line 4</h2>
+          <ul>
+            <li><b>XOFF:</b> The horizontal offset of the cards</li>
+            <li><b>YOFF:</b> The vertical offset of the cards</li>
+            <li><b>SXOFF:</b> The offset of the horizontal shadow (mostly 7)</li>
+            <li><b>SYOFF:</b> The offset of the vertical shadow (mostly 7)</li>
+          </ul>
+      <h2>Line 5</h2>
+          <p><code>back01.ext</code>: The name of the default back image (where <code>ext</code> means the file extension e.g: <code>png</code> or <code>gif</code>.)</p>
+      <h2>Line 6</h2>
+          <p><code>back01.ext;back02.ext;back03.ext;…`</code>: The name of the other
+            back images, including the default one.</p>
+      <h2>About this document:</h2>
+           <p><b>NOTE:</b> This tutorial may be incomplete. It is given as
+            is, without any warranty, to help players customize their own cardsets.
+            You are welcome to send any suggestions to: <a href="mailto:neelix570@gmail.com">the Author&#8217;s E-mail</a>,
+            <a href="https://github.com/shlomif/PySolFC/issues">PySol FC&#8217;s GitHub issue tracker</a>            or
+            <a href="https://sourceforge.net/p/pysolfc/_list/tickets">PySol FC&#8217;s Sourceforge issue tracker</a>.</p>
+          <p><b>NOTE 2:</b> You should also place a file called <code>COPYRIGHT</code> in the same directory as <code>config.txt</code>, containing the text
+            that can be accessed via <code>Info/Settings</code>.</p>
+        <h3>License:</h3>
+            <p>This tutorial was created under the terms of the GNU General Public License
+              version 3 or later. You can redistribute it as is and/or modify it.</p>
+            <p>Shlomi Fish, hereby puts his modifications to this document under
+              <a href="https://github.com/shlomif/shlomif-computer-settings/blob/master/shlomif-settings/git/commit-messages/cc0-copyright-disclaimer.txt">CC0/Public Domain/MIT License/GPL terms</a></p>
+          <h3>Credits:</h3>
+            <p>Credits go to:</p>
+            <ul>
+            <li><a href="mailto:andsa@web.de">Andreas Sauer</a> for clarifying certain
+              points</li>
+            <li><a href="https://www.shlomifish.org/">Shlomi Fish</a> for making some
+              improvements to this tutorial</li>
+            </ul>
+
+
+<p>
+<br>
+<a href="index.html">Back to the index</a>
+<hr>
+<i>PySol Lite Documentation - version 26.11</i>
+</body>
+</html>

@@ -92,4 +92,4 @@ class BuffaloBill(Game):
 
 # register the game
 registerGame(GameInfo(338, BuffaloBill, "Buffalo Bill",
-                      GI.GT_2DECK_TYPE | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_MISC_TYPE | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL))

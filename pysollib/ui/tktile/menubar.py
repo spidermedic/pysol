@@ -569,31 +569,28 @@ class PysolMenubarTkCommon:
 
     # The game shown first in each category's menu, above a separator.
     CATEGORY_FEATURED_GAME = {
-        "Baker's Dozen type": "Baker's Dozen",
-        "Beleaguered Castle type": "Beleaguered Castle",
-        "Canfield type": "Canfield",
-        "Fan type": "Fan",
-        "Forty Thieves type": "Forty Thieves",
-        "FreeCell type": "FreeCell",
-        "Golf type": "Golf",
-        "Gypsy type": "Gypsy",
-        "Klondike type": "Klondike",
-        "Montana type": "Montana",
-        "Napoleon type": "Der kleine Napoleon",
-        "Numerica type": "Numerica",
-        "Pairing type": "Pyramid",
-        "Picture Gallery type": "Picture Gallery",
-        "Raglan type": "Raglan",
-        "Spider type": "Spider",
-        "Terrace type": "Terrace",
-        "Yukon type": "Yukon",
-        "One-Deck games": "Aces Up",
-        "Two-Deck games": "Alhambra",
-        "Three-Deck games": "Algerian Patience (3 Decks)",
-        "Cribbage type": "Cribbage Square",
-        "Poker type": "Poker Square",
-        "Shisen-Sho type": "Shisen-Sho 14x6",
-        "&Mahjongg games": "Mahjongg Traditional",
+        "Baker's Dozen": "Baker's Dozen",
+        "Beleaguered Castle": "Beleaguered Castle",
+        "Canfield": "Canfield",
+        "Fan": "Fan",
+        "Forty Thieves": "Forty Thieves",
+        "FreeCell": "FreeCell",
+        "Golf": "Golf",
+        "Gypsy": "Gypsy",
+        "Klondike": "Klondike",
+        "Montana": "Montana",
+        "Napoleon": "Der kleine Napoleon",
+        "Numerica": "Numerica",
+        "Pairing": "Pyramid",
+        "Picture Gallery": "Picture Gallery",
+        "Raglan": "Raglan",
+        "Spider": "Spider",
+        "Terrace": "Terrace",
+        "Yukon": "Yukon",
+        "Miscellaneous": "Aces Up",
+        "Cribbage": "Cribbage Square",
+        "Poker": "Poker Square",
+        "&Mahjongg": "Mahjongg Traditional",
     }
 
     def _addSelectCategorySubMenus(self, games, menu):
@@ -605,7 +602,7 @@ class PysolMenubarTkCommon:
         data = [(label, func, False)
                 for label, func in GI.SELECT_GAME_BY_TYPE
                 + GI.SELECT_SPECIAL_GAME_BY_TYPE if label is not None]
-        data.append(("&Mahjongg games", mahjongg_func, True))
+        data.append(("&Mahjongg", mahjongg_func, True))
         data.sort(key=lambda d: d[0].replace("&", "").lower())
         for label, func, short_name in data:
             g = list(filter(func, games))

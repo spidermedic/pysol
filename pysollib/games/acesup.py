@@ -244,7 +244,7 @@ class TabbyCat(Game):
 
 # register the game
 registerGame(GameInfo(903, AcesUp, "Aces Up",                   # was: 52
-                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK,
+                      GI.GT_MISC_TYPE, 1, 0, GI.SL_MOSTLY_LUCK,
                       altnames=("Aces High", "Drivel", "Discard")))
 registerGame(GameInfo(756, TabbyCat, "Tabby Cat",
-                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_SPIDER, 1, 0, GI.SL_MOSTLY_SKILL))

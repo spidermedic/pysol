@@ -453,7 +453,7 @@ class Shisen_24x12(AbstractShisenGame):
 def r(id, gameclass, name):
     decks, ranks, trumps = comp_cardset(gameclass.NCARDS)
     gi = GameInfo(id, gameclass, name,
-                  GI.GT_SHISEN_SHO, 4*decks, 0, GI.SL_MOSTLY_SKILL,
+                  GI.GT_MAHJONGG, 4*decks, 0, GI.SL_MOSTLY_SKILL,
                   category=GI.GC_MAHJONGG, short_name=name,
                   suits=list(range(3)), ranks=list(range(ranks)),
                   trumps=list(range(trumps)),

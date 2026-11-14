@@ -316,8 +316,8 @@ class Accordion2Deck(Accordion2):
 
 
 registerGame(GameInfo(772, Accordion2, "Accordion",
-                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_SKILL,
+                      GI.GT_MISC_TYPE, 1, 0, GI.SL_SKILL,
                       altnames=('Idle Year', 'Methuselah', 'Tower of Babel',
                                 'One Away Three Away', 'One-Handed')))
 registerGame(GameInfo(994, Accordion2Deck, "Accordion (2 Decks)",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_SKILL))
+                      GI.GT_MISC_TYPE, 2, 0, GI.SL_SKILL))

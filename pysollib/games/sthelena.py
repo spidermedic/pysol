@@ -161,6 +161,6 @@ class StHelena(Game):
 
 # register the game
 registerGame(GameInfo(302, StHelena, "St. Helena",
-                      GI.GT_2DECK_TYPE, 2, 2, GI.SL_BALANCED,
+                      GI.GT_MISC_TYPE, 2, 2, GI.SL_BALANCED,
                       altnames=("Napoleon's Favorite",
                                 "Washington's Favorite")))

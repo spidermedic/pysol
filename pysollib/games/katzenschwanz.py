@@ -434,6 +434,6 @@ registerGame(GameInfo(279, Kings, "Kings",
                       GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL,
                       altnames=("Retinue of Kings", "King's Plume")))
 registerGame(GameInfo(299, SalicLaw, "Salic Law",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_LUCK))
+                      GI.GT_MISC_TYPE, 2, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(523, Intrigue, "Intrigue",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
+                      GI.GT_MISC_TYPE, 2, 0, GI.SL_BALANCED))
