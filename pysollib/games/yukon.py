@@ -506,8 +506,6 @@ registerGame(GameInfo(188, ChineseSolitaire, "Chinese Solitaire",
                       GI.GT_YUKON | GI.GT_XORIGINAL, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(189, Queenie, "Queenie",
                       GI.GT_YUKON | GI.GT_XORIGINAL, 1, 0, GI.SL_BALANCED))
-registerGame(GameInfo(190, Rushdike, "Rushdike",
-                      GI.GT_YUKON | GI.GT_XORIGINAL, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(192, Abacus, "Abacus",
                       GI.GT_YUKON | GI.GT_XORIGINAL, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(271, DoubleYukon, "Double Yukon",

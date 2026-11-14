@@ -32,7 +32,6 @@ from pysollib.stack import (
     WasteStack,
     WasteTalonStack,
 )
-from pysollib.util import ACE
 
 # ************************************************************************
 # * Diplomat
@@ -104,72 +103,6 @@ class Diplomat(Game):
     shallHighlightMatch = Game._shallHighlightMatch_RK
 
 
-# ************************************************************************
-# * Congress
-# * Parliament
-# ************************************************************************
-
-class Congress(Diplomat):
-    DEAL = (0, 1)
-    FILL_EMPTY_ROWS = 1
-
-    Foundation_Classes = [SS_FoundationStack, SS_FoundationStack]
-
-    #
-    # game layout (just rearrange the stacks a little bit)
-    #
-
-    def createGame(self, max_rounds=1):
-        # create layout
-        l, s = Layout(self), self.s
-
-        # set window
-        self.setSize(l.XM + 7*l.XS, l.YM + 4*l.YS)
-
-        # create stacks
-        x = l.XM+4*l.XS
-        for fnd_cls in self.Foundation_Classes:
-            y = l.YM
-            for i in range(4):
-                s.foundations.append(fnd_cls(x, y, self, suit=i))
-                y += l.YS
-            x += l.XS
-        for i in range(4):
-            for j in range(2):
-                x, y = l.XM + (3+3*j)*l.XS, l.YM + i*l.YS
-                stack = self.RowStack_Class(x, y, self)
-                stack.CARD_YOFFSET = 0
-                s.rows.append(stack)
-        x, y, = l.XM, l.YM
-        s.talon = WasteTalonStack(x, y, self, max_rounds=max_rounds)
-        l.createText(s.talon, "s")
-        x = x + l.XS
-        s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, "s")
-        if max_rounds > 1:
-            l.createRoundText(s.talon, 'ne', dx=l.XS)
-
-        # define stack-groups
-        l.defaultStackGroups()
-
-
-class Parliament(Congress):
-
-    def _shuffleHook(self, cards):
-        # move Aces to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(
-            cards, lambda c: (c.rank == ACE, (c.deck, c.suit)))
-
-    def startGame(self):
-        self.s.talon.dealRow(rows=self.s.foundations, frames=0)
-        Congress.startGame(self)
-
-
 # register the game
 registerGame(GameInfo(149, Diplomat, "Diplomat",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
-registerGame(GameInfo(150, Congress, "Congress",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("President's Cabinet",)))
-registerGame(GameInfo(548, Parliament, "Parliament",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))

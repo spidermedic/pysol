@@ -30,7 +30,6 @@ from pysollib.pysoltk import MfxCanvasText
 from pysollib.stack import \
         AC_FoundationStack, \
         AC_RowStack, \
-        DealRowRedealTalonStack, \
         DealRow_StackMethods, \
         FullStackWrapper, \
         InitialDealTalonStack, \
@@ -573,74 +572,6 @@ class BoxFan(Fan):
 
 
 # ************************************************************************
-# * Troika
-# ************************************************************************
-
-class Troika(Fan):
-    RowStack_Class = StackWrapper(RK_RowStack, dir=0,
-                                  base_rank=NO_RANK, max_cards=3)
-
-    def createGame(self):
-        Fan.createGame(self, rows=(6, 6, 6), playcards=4)
-
-    def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return card1.rank == card2.rank
-
-    def startGame(self, ncards=3):
-        self.startDealSample()
-        for r in self.s.rows:
-            for i in range(ncards):
-                if not self.s.talon.cards:
-                    break
-                c = self.s.talon.cards[-1]
-                t = r
-                if c.rank == ACE:
-                    t = self.s.foundations[c.suit]
-                self.s.talon.dealRow(rows=[t], frames=4)
-
-
-# ************************************************************************
-# * Open Proils
-# ************************************************************************
-
-class RoamingProils_RowStack(RK_RowStack):
-
-    def acceptsCards(self, from_stack, cards):
-        if not RK_RowStack.acceptsCards(self, from_stack, cards):
-            return False
-        rank_sequence = 1
-        for card in reversed(self.cards):
-            if card.rank == cards[0].rank and card.face_up:
-                rank_sequence += 1
-            else:
-                break
-
-        if rank_sequence > 3:
-            return False
-        return True
-
-
-class RoamingProils(Fan):
-    RowStack_Class = StackWrapper(RoamingProils_RowStack, dir=0,
-                                  base_rank=NO_RANK)
-    ReserveStack_Class = StackWrapper(ReserveStack, base_rank=KING)
-
-    def createGame(self):
-        Fan.createGame(self, rows=(5, 5, 5, 2), playcards=5, reserves=1)
-
-    def startGame(self, flip=0):
-        for i in range(2):
-            self.s.talon.dealRow(rows=self.s.rows[:17], flip=flip, frames=0)
-        self._startAndDealRow()
-        self.s.talon.dealRow(rows=self.s.reserves)
-
-
-class OpenProils(RoamingProils):
-    def startGame(self):
-        RoamingProils.startGame(self, flip=1)
-
-
-# ************************************************************************
 # * Fascination Fan
 # ************************************************************************
 
@@ -777,128 +708,6 @@ class RainbowFan(Crescent):
             self.leaveState(old_state)
 
 
-# ************************************************************************
-# * Forest Glade
-# ************************************************************************
-
-class ForestGlade_Talon(DealRowRedealTalonStack):
-
-    def _redeal(self, rows=None, frames=0):
-        # move all cards to the talon
-        num_cards = 0
-        if rows is None:
-            rows = self.game.s.rows
-        for r in rows:
-            for i in range(len(r.cards)):
-                num_cards += 1
-                self.game.moveMove(1, r, self, frames=frames, shadow=0)
-                if self.cards[-1].face_up:
-                    self.game.flipMove(self)
-        return num_cards
-
-    def canDealCards(self):
-        if self.round == self.max_rounds:
-            if not self.cards:
-                return False
-            for r in self.game.s.rows:
-                if not r.cards:
-                    return True
-            return False
-        return True
-
-    def dealCards(self, sound=False):
-        rows = [r for r in self.game.s.rows if not r.cards]
-        if not rows or not self.cards:
-            if sound and self.game.app.opt.animations:
-                self.game.startDealSample()
-            # move all cards to the talon
-            ncards = self._redeal(frames=4)
-            # shuffle
-            self.game.shuffleStackMove(self)
-            # deal
-            if self.cards:
-                for r in self.game.s.rows:
-                    for i in range(3):
-                        if not self.cards:
-                            break
-                        ncards += self.dealRowAvail(rows=[r], frames=4)
-            #
-            self.game.nextRoundMove(self)
-            if sound:
-                self.game.stopSamples()
-            return ncards
-        #
-        if sound and self.game.app.opt.animations:
-            self.game.startDealSample()
-        ncards = 0
-        for r in rows:
-            for i in range(3):
-                if not self.cards:
-                    break
-                ncards += self.dealRowAvail(rows=[r], sound=False)
-        if sound:
-            self.game.stopSamples()
-        return ncards
-
-
-class ForestGlade(Game):
-    Hint_Class = CautiousDefaultHint
-
-    def createGame(self):
-
-        l, s = Layout(self), self.s
-        playcards = 7
-        w0 = l.XS+(playcards-1)*l.XOFFSET
-        w, h = l.XM + 3*w0 + 4*l.XS, l.YM+6*l.YS
-        self.setSize(w, h)
-
-        x1, x2 = l.XM, self.width - 2*l.XS
-        for i in range(2):
-            y = l.YM
-            for j in range(4):
-                s.foundations.append(SS_FoundationStack(x1, y, self,
-                                     suit=j, dir=2, max_cards=7))
-                s.foundations.append(SS_FoundationStack(x2, y, self,
-                                     base_rank=1, suit=j, dir=2, max_cards=6))
-                y += l.YS
-            x1 += l.XS
-            x2 += l.XS
-
-        x, y = l.XM + 3*l.XS, l.YM
-        for i in (0, 1):
-            stack = SS_RowStack(x, y, self, max_move=1, base_rank=KING)
-            stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
-            s.rows.append(stack)
-            x += w0
-        y = l.YM+l.YS
-        for i in range(4):
-            x = l.XM + 2*l.XS
-            for j in range(3):
-                stack = SS_RowStack(x, y, self, max_move=1, base_rank=KING)
-                stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
-                s.rows.append(stack)
-                x += w0
-            y += l.YS
-        x, y = l.XM + 3*l.XS, l.YM + 5*l.YS
-        for i in (0, 1):
-            stack = SS_RowStack(x, y, self, max_move=1, base_rank=KING)
-            stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
-            s.rows.append(stack)
-            x += w0
-
-        x, y = l.XM, self.height - l.YS
-        s.talon = ForestGlade_Talon(x, y, self, max_rounds=3)
-        l.createText(s.talon, 'ne')
-        l.createRoundText(s.talon, 'se')
-
-        l.defaultStackGroups()
-
-    def startGame(self):
-        self._startDealNumRowsAndDealSingleRow(2)
-
-    shallHighlightMatch = Game._shallHighlightMatch_SS
-
-
 # register the game
 registerGame(GameInfo(56, FanGame, "Fan",
                       GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
@@ -931,17 +740,11 @@ registerGame(GameInfo(347, FreeFan, "Free Fan",
                       GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(385, BoxFan, "Box Fan",
                       GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(516, Troika, "Troika",
-                      GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(625, FascinationFan, "Fascination Fan",
                       GI.GT_FAN_TYPE, 1, 6, GI.SL_BALANCED,
                       altnames=('Demon Fan',)))
 registerGame(GameInfo(647, Crescent, "Crescent",
                       GI.GT_FAN_TYPE | GI.GT_OPEN, 2, 3, GI.SL_MOSTLY_SKILL,
                       altnames=('La Demi-Lune',)))
-registerGame(GameInfo(739, ForestGlade, "Forest Glade",
-                      GI.GT_FAN_TYPE, 2, 2, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(834, RainbowFan, "Rainbow Fan",
                       GI.GT_FAN_TYPE, 2, 3, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(908, OpenProils, "Open Proils",
-                      GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_BALANCED))

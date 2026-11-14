@@ -31,7 +31,6 @@ from pysollib.stack import (
     AC_RowStack,
     BasicRowStack,
     FreeCell_AC_RowStack,
-    FreeCell_SS_RowStack,
     InitialDealTalonStack,
     RK_FoundationStack,
     ReserveStack,
@@ -388,25 +387,6 @@ class FourColours(FreeCell):
 
 
 # ************************************************************************
-# * Ocean Towers
-# ************************************************************************
-
-class OceanTowers(TripleFreecell):
-    Solver_Class = FreeCellSolverWrapper(esf='kings', sbb='suit')
-    RowStack_Class = StackWrapper(FreeCell_SS_RowStack, base_rank=KING)
-
-    def createGame(self):
-        TripleFreecell.createGame(self, rows=14, reserves=8, playcards=20)
-
-    def startGame(self):
-        self._startDealNumRows(6)
-        self.s.talon.dealRow()
-        self.s.talon.dealRow(rows=self.s.reserves[1:-1])
-
-    shallHighlightMatch = Game._shallHighlightMatch_SS
-
-
-# ************************************************************************
 # * KingCell
 # ************************************************************************
 
@@ -442,8 +422,5 @@ registerGame(GameInfo(451, Cell11, "Cell 11",
                       GI.GT_FREECELL | GI.GT_OPEN, 3, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(464, FourColours, "Four Colours",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(513, OceanTowers, "Double Seahaven Towers",
-                      GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("Ocean Towers")))
 registerGame(GameInfo(542, KingCell, "KingCell",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))

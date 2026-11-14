@@ -35,7 +35,7 @@ from pysollib.stack import \
     StackWrapper, \
     WasteStack, \
     WasteTalonStack
-from pysollib.util import ACE, ANY_SUIT, KING
+from pysollib.util import ACE, ANY_SUIT
 
 # ************************************************************************
 # *
@@ -55,95 +55,6 @@ class Windmill_RowStack(ReserveStack):
             return False
         # this stack accepts one card from the Waste pile
         return from_stack is self.game.s.waste
-
-
-# ************************************************************************
-# * Windmill
-# ************************************************************************
-
-class Windmill(Game):
-
-    Foundation_Classes = [
-        StackWrapper(Windmill_Foundation, mod=13, min_cards=1, max_cards=52),
-        StackWrapper(Windmill_Foundation, base_rank=KING, dir=-1),
-        ]
-    RowStack_Class = Windmill_RowStack
-
-    FOUNDATIONS_LAYOUT = ((1, 0.6), (3, 0.6), (1, 3.4), (3, 3.4))
-    ROWS_LAYOUT = ((2, 0), (2, 1), (0, 2), (1, 2), (3, 2), (4, 2),
-                   (2, 3), (2, 4))
-    FILL_STACK = True
-
-    #
-    # game layout
-    #
-
-    def createGame(self, card_x_space=20):
-        # create layout
-        l, s = Layout(self, card_x_space=card_x_space), self.s
-
-        # set window
-        max_x = max(i[0] for i in self.FOUNDATIONS_LAYOUT+self.ROWS_LAYOUT)
-        max_y = max(i[1] for i in self.FOUNDATIONS_LAYOUT+self.ROWS_LAYOUT)
-        self.setSize((3+max_x)*l.XS+l.XM, (1+max_y)*l.YS+l.YM+l.YM)
-
-        # create stacks
-        x = l.XM
-        y = l.YM
-        s.talon = WasteTalonStack(x, y, self, max_rounds=1)
-        l.createText(s.talon, "s")
-        x = x + l.XS
-        s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, "s")
-        x0, y0 = x + l.XS, y
-        for d in self.ROWS_LAYOUT:
-            x, y = x0 + d[0] * l.XS, y0 + d[1] * l.YS
-            stack = self.RowStack_Class(x, y, self)
-            s.rows.append(stack)
-            stack.CARD_XOFFSET, stack.CARD_YOFFSET = 0, 0
-        x, y = x0 + 2 * l.XS, y0 + 2 * l.YS
-        fnd_cls = self.Foundation_Classes[0]
-        s.foundations.append(fnd_cls(x, y, self))
-        fnd_cls = self.Foundation_Classes[1]
-        for d in self.FOUNDATIONS_LAYOUT:
-            x, y = x0 + d[0] * l.XS, y0 + d[1] * l.YS
-            s.foundations.append(fnd_cls(x, y, self))
-
-        # define stack-groups
-        l.defaultStackGroups()
-
-    #
-    # game overrides
-    #
-
-    def _shuffleHook(self, cards):
-        for c in cards:
-            if c.id == 0:
-                break
-        cards.remove(c)
-        return cards + [c]
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow(rows=(self.s.foundations[0],))
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()          # deal first card to WasteStack
-
-    def fillStack(self, stack):
-        if self.FILL_STACK and len(stack.cards) == 0:
-            if stack is self.s.waste and self.s.talon.cards:
-                self.s.talon.dealCards()
-            elif stack in self.s.rows and self.s.waste.cards:
-                self.s.waste.moveMove(1, stack)
-
-    shallHighlightMatch = Game._shallHighlightMatch_RK
-
-    def getHighlightPilesStacks(self):
-        return ()
-
-    def getAutoStacks(self, event=None):
-        # disable auto drop - this would ruin the whole gameplay
-        return ((), (), ())
 
 
 # ************************************************************************
@@ -324,9 +235,6 @@ class FourSeasons(Czarina):
 
 
 # register the game
-registerGame(GameInfo(30, Windmill, "Windmill",
-                      GI.GT_MISC_TYPE, 2, 0, GI.SL_MOSTLY_LUCK,
-                      altnames=('Propeller',)))
 registerGame(GameInfo(277, NapoleonsTomb, "Napoleon's Tomb",
                       GI.GT_MISC_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(417, Corners, "Corners",

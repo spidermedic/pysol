@@ -499,79 +499,10 @@ class Twenty(Game):
             self.leaveState(old_state)
 
 
-# ************************************************************************
-# * Four Winds
-# * Boxing the Compass
-# ************************************************************************
-
-class FourWinds(Game):
-
-    def createGame(self):
-        l, s = Layout(self), self.s
-        self.setSize(l.XM+9*l.XS, l.YM+6*l.YS)
-
-        # vertical rows
-        x = l.XM+l.XS
-        for i in (0, 1):
-            y = l.YM+l.YS
-            for j in range(4):
-                stack = ReserveStack(x, y, self, base_suit=i)
-                stack.getBottomImage = stack._getSuitBottomImage
-                s.rows.append(stack)
-                y += l.YS
-            x += 6*l.XS
-        # horizontal rows
-        y = l.YM+l.YS
-        for i in (2, 3):
-            x = l.XM+2.5*l.XS
-            for j in range(4):
-                stack = ReserveStack(x, y, self, base_suit=i)
-                stack.getBottomImage = stack._getSuitBottomImage
-                s.rows.append(stack)
-                x += l.XS
-            y += 3*l.YS
-        # foundations
-        decks = self.gameinfo.decks
-        for k in range(decks):
-            suit = 0
-            for i, j in ((0, 3-decks*0.5+k),
-                         (8, 3-decks*0.5+k),
-                         (4.5-decks*0.5+k, 0),
-                         (4.5-decks*0.5+k, 5)):
-                x, y = l.XM+i*l.XS, l.YM+j*l.YS
-                s.foundations.append(SS_FoundationStack(x, y, self,
-                                     suit=suit, max_move=0))
-                suit += 1
-        # talon & waste
-        x, y = l.XM+3.5*l.XS, l.YM+2.5*l.YS
-        s.talon = WasteTalonStack(x, y, self, max_rounds=2)
-        l.createText(s.talon, 's')
-        l.createRoundText(self.s.talon, 'nn')
-        x += l.XS
-        s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, 's')
-
-        l.defaultStackGroups()
-
-    def startGame(self):
-        self.s.talon.dealRow(rows=self.s.foundations, frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()
-
-    def _shuffleHook(self, cards):
-        # move Aces to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(
-            cards,
-            lambda c: (c.rank == ACE, (c.deck, c.suit)))
-
-
 # register the game
 registerGame(GameInfo(54, RoyalCotillion, "Royal Cotillion",
                       GI.GT_MISC_TYPE, 2, 0, GI.SL_LUCK,
                       altnames=("Lords and Ladies",)))
-registerGame(GameInfo(234, Alhambra, "Alhambra",
-                      GI.GT_MISC_TYPE, 2, 2, GI.SL_BALANCED))
 registerGame(GameInfo(97, Carpet, "Carpet",
                       GI.GT_MISC_TYPE | GI.GT_CHILDREN, 1, 0,
                       GI.SL_MOSTLY_LUCK))
@@ -581,5 +512,3 @@ registerGame(GameInfo(391, BritishConstitution, "British Constitution",
                       altnames=("Constitution",)))
 registerGame(GameInfo(443, Twenty, "Twenty",
                       GI.GT_NUMERICA, 2, 0, GI.SL_BALANCED))
-registerGame(GameInfo(675, FourWinds, "Four Winds",
-                      GI.GT_MISC_TYPE, 1, 1, GI.SL_BALANCED))

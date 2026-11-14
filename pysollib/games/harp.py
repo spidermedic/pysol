@@ -29,10 +29,8 @@ from pysollib.layout import Layout
 from pysollib.mfxutil import kwdefault
 from pysollib.stack import (
     AC_RowStack,
-    BO_RowStack,
     KingAC_RowStack,
     SS_FoundationStack,
-    SS_RowStack,
     Spider_SS_RowStack,
     StackWrapper,
     WasteStack,
@@ -125,13 +123,6 @@ class TripleKlondike(DoubleKlondike):
         DoubleKlondike.createGame(self, rows=13)
 
 
-class ChineseKlondike(DoubleKlondike):
-    RowStack_Class = StackWrapper(BO_RowStack, base_rank=KING)
-
-    def createGame(self):
-        DoubleKlondike.createGame(self, rows=12)
-
-
 # ************************************************************************
 # * Quadruple Klondike
 # * Quadruple Klondike by Threes
@@ -153,35 +144,6 @@ class LadyJane(DoubleKlondike):
 
     def createGame(self):
         DoubleKlondike.createGame(self, rows=10, max_rounds=2, num_deal=3)
-
-    def startGame(self):
-        DoubleKlondike.startGame(self, flip=1)
-
-    shallHighlightMatch = Game._shallHighlightMatch_RK
-    getQuickPlayScore = Game._getSpiderQuickPlayScore
-
-
-class Inquisitor(DoubleKlondike):
-    RowStack_Class = SS_RowStack
-
-    def createGame(self):
-        DoubleKlondike.createGame(self, rows=10, max_rounds=3, num_deal=3)
-
-    def startGame(self):
-        DoubleKlondike.startGame(self, flip=1)
-    shallHighlightMatch = Game._shallHighlightMatch_SS
-
-
-# ************************************************************************
-# * Arabella
-# ************************************************************************
-
-class Arabella(DoubleKlondike):
-    Hint_Class = Spider_Hint
-    RowStack_Class = StackWrapper(Spider_SS_RowStack, base_rank=KING)
-
-    def createGame(self):
-        DoubleKlondike.createGame(self, rows=13, max_rounds=1, playcards=24)
 
     def startGame(self):
         DoubleKlondike.startGame(self, flip=1)
@@ -241,13 +203,6 @@ registerGame(GameInfo(273, TripleKlondike, "Triple Klondike",
                       GI.GT_KLONDIKE, 3, -1, GI.SL_BALANCED))
 registerGame(GameInfo(495, LadyJane, "Lady Jane",
                       GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
-registerGame(GameInfo(496, Inquisitor, "Inquisitor",
-                      GI.GT_KLONDIKE, 2, 2, GI.SL_BALANCED))
-registerGame(GameInfo(497, Arabella, "Arabella",
-                      GI.GT_KLONDIKE, 3, 0, GI.SL_BALANCED))
-registerGame(GameInfo(590, ChineseKlondike, "Chinese Klondike",
-                      GI.GT_KLONDIKE | GI.GT_STRIPPED, 3, -1, GI.SL_BALANCED,
-                      suits=(0, 1, 2)))
 registerGame(GameInfo(668, DoubleKingsley, "Double Kingsley",
                       GI.GT_KLONDIKE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(678, ThievesOfEgypt, "Thieves of Egypt",

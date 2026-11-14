@@ -27,11 +27,8 @@ from pysollib.games.gypsy import DieRussische_Foundation
 from pysollib.hint import CautiousDefaultHint
 from pysollib.layout import Layout
 from pysollib.stack import (
-    AC_FoundationStack,
     AC_RowStack,
     BO_RowStack,
-    RK_RowStack,
-    ReserveStack,
     SS_FoundationStack,
     SS_RowStack,
     Spider_SS_RowStack,
@@ -42,9 +39,7 @@ from pysollib.stack import (
 from pysollib.util import (
     ACE,
     KING,
-    NO_RANK,
     UNLIMITED_MOVES,
-    UNLIMITED_REDEALS,
 )
 
 
@@ -177,11 +172,6 @@ class Limited(BusyAces):
     DEAL = (0, 3)
 
 
-class Courtyard(BusyAces):
-    ROW_MAX_MOVE = UNLIMITED_MOVES
-    FILL_EMPTY_ROWS = 1
-
-
 class WaningMoon(FortyThieves):
     def createGame(self):
         FortyThieves.createGame(self, rows=13)
@@ -223,84 +213,6 @@ class SixtyThieves(FortyThieves):
         FortyThieves.createGame(self, rows=12, playcards=16, XCARDS=96)
 
 
-class EightyThieves(FortyThieves):
-    DEAL = (0, 8)
-
-    def createGame(self):
-        FortyThieves.createGame(self, rows=10, playcards=16, XCARDS=128)
-
-
-# ************************************************************************
-# * Deuces
-# * Pluto
-# ************************************************************************
-
-class Deuces(FortyThieves):
-    Foundation_Class = StackWrapper(SS_FoundationStack, mod=13, base_rank=1)
-    RowStack_Class = StackWrapper(SS_RowStack, mod=13)
-
-    DEAL = (0, 1)
-
-    def _shuffleHook(self, cards):
-        # move Twos to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(
-            cards, lambda c: (c.rank == 1, c.suit))
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow(rows=self.s.foundations)
-        FortyThieves.startGame(self)
-
-    shallHighlightMatch = Game._shallHighlightMatch_SSW
-
-
-class Pluto(Deuces):
-    def createGame(self):
-        FortyThieves.createGame(self, rows=12)
-
-    def _shuffleHook(self, cards):
-        return FortyThieves._shuffleHook(self, cards)
-
-    def startGame(self):
-        self.startDealSample()
-        FortyThieves.startGame(self)
-
-
-# ************************************************************************
-# * Corona
-# * Quadrangle
-# ************************************************************************
-
-class Corona(FortyThieves):
-    FOUNDATION_MAX_MOVE = 0
-    DEAL = (0, 3)
-    FILL_EMPTY_ROWS = 1
-
-    def createGame(self):
-        FortyThieves.createGame(self, rows=12)
-
-
-class Quadrangle(Corona):
-    Foundation_Class = StackWrapper(
-        SS_FoundationStack, mod=13, base_rank=NO_RANK)
-    RowStack_Class = StackWrapper(SS_RowStack, mod=13)
-
-    def startGame(self):
-        FortyThieves.startGame(self)
-        self.s.talon.dealSingleBaseCard()
-
-    shallHighlightMatch = Game._shallHighlightMatch_SSW
-
-
-# ************************************************************************
-# * Forty and Eight
-# ************************************************************************
-
-class FortyAndEight(FortyThieves):
-    def createGame(self):
-        FortyThieves.createGame(self, max_rounds=2, rows=8, XCARDS=72)
-
-
 # ************************************************************************
 # * Little Forty
 # ************************************************************************
@@ -333,11 +245,6 @@ class Streets(FortyThieves):
     shallHighlightMatch = Game._shallHighlightMatch_AC
 
 
-class Maria(Streets):
-    def createGame(self):
-        Streets.createGame(self, rows=9)
-
-
 class NumberTen(Streets):
     ROW_MAX_MOVE = UNLIMITED_MOVES
     DEAL = (2, 2)
@@ -348,50 +255,11 @@ class RankAndFile(Streets):
     DEAL = (3, 1)
 
 
-class Emperor(Streets):
-    DEAL = (3, 1)
-
-
 class Roosevelt(Streets):
     DEAL = (0, 4)
 
     def createGame(self):
         Streets.createGame(self, rows=7)
-
-
-# ************************************************************************
-# * Red and Black
-# * Zebra
-# *   rows build down by alternate color, foundations up by alternate color
-# ************************************************************************
-
-class RedAndBlack(Streets):
-    Foundation_Class = AC_FoundationStack
-
-    ROW_MAX_MOVE = UNLIMITED_MOVES
-    DEAL = (0, 1)
-
-    def createGame(self):
-        FortyThieves.createGame(self, rows=8)
-
-    def _shuffleHook(self, cards):
-        # move Aces to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(
-            cards, lambda c: (c.rank == 0, c.suit))
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow(rows=self.s.foundations)
-        Streets.startGame(self)
-
-
-class Zebra(RedAndBlack):
-    FOUNDATION_MAX_MOVE = 0
-    ROW_MAX_MOVE = 1
-    FILL_EMPTY_ROWS = 1
-
-    def createGame(self):
-        FortyThieves.createGame(self, max_rounds=2, rows=8, XOFFSET=0)
 
 
 # ************************************************************************
@@ -417,41 +285,6 @@ class Indian(NapoleonsFolly):
         return (card1.suit != card2.suit and
                 (card1.rank + 1 == card2.rank or
                  card2.rank + 1 == card1.rank))
-
-
-class Midshipman(Indian):
-    DEAL = (2, 2)
-
-    def createGame(self):
-        FortyThieves.createGame(self, rows=9)
-
-
-# ************************************************************************
-# * Napoleon's Exile
-# * Double Rail
-# * Single Rail (1 deck)
-# *   rows build down by rank
-# ************************************************************************
-
-class NapoleonsExile(FortyThieves):
-    RowStack_Class = RK_RowStack
-
-    DEAL = (0, 4)
-
-    shallHighlightMatch = Game._shallHighlightMatch_RK
-
-
-class DoubleRail(NapoleonsExile):
-    ROW_MAX_MOVE = UNLIMITED_MOVES
-    DEAL = (0, 1)
-
-    def createGame(self):
-        FortyThieves.createGame(self, rows=5)
-
-
-class SingleRail(DoubleRail):
-    def createGame(self):
-        FortyThieves.createGame(self, rows=4, XCARDS=48)
 
 
 # ************************************************************************
@@ -510,147 +343,6 @@ class FortunesFavor(Game):
                 self.s.waste.moveMove(1, stack)
 
     shallHighlightMatch = Game._shallHighlightMatch_SS
-
-
-# ************************************************************************
-# * Octagon
-# ************************************************************************
-
-class Octagon(Game):
-    Hint_Class = CautiousDefaultHint
-
-    def createGame(self):
-
-        l, s = Layout(self), self.s
-
-        w1 = max(l.XS + 12 * l.XOFFSET, l.XM + 2 * l.XS + l.XS // 2)
-        w, h = l.XM + 2 * l.XS + 2 * w1, l.YM + 4 * l.YS
-        self.setSize(w, h)
-
-        for x, y in ((l.XM,                l.YM),
-                     (l.XM+w1+2*l.XS+l.XM, l.YM),
-                     (l.XM,                l.YM+3*l.YS),
-                     (l.XM+w1+2*l.XS+l.XM, l.YM+3*l.YS),):
-            stack = SS_RowStack(x, y, self, max_move=1)
-            stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
-            s.rows.append(stack)
-        i = 0
-        for x, y in ((l.XM+w1,                    l.YM),
-                     (l.XM+w1+l.XS,               l.YM),
-                     (l.XM+w1-2*l.XS-l.XS//2-l.XM, l.YM+1.5*l.YS),
-                     (l.XM+w1-l.XS-l.XS//2-l.XM,   l.YM+1.5*l.YS),
-                     (l.XM+w1+2*l.XS+l.XS//2+l.XM, l.YM+1.5*l.YS),
-                     (l.XM+w1+3*l.XS+l.XS//2+l.XM, l.YM+1.5*l.YS),
-                     (l.XM+w1,                    l.YM+3*l.YS),
-                     (l.XM+w1+l.XS,               l.YM+3*l.YS),):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i % 4))
-            i += 1
-        x, y = l.XM+w1, l.YM+1.5*l.YS
-        s.talon = WasteTalonStack(x, y, self, max_rounds=4)
-        l.createText(s.talon, 's')
-        l.createRoundText(s.talon, 'nn')
-        x += l.XS
-        s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, 's')
-
-        l.defaultStackGroups()
-
-    def _shuffleHook(self, cards):
-        # move Aces to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(
-            cards, lambda c: (c.rank == ACE, (c.deck, c.suit)))
-
-    def startGame(self):
-        self.s.talon.dealRow(rows=self.s.foundations, frames=0)
-        self.startDealSample()
-        for i in range(5):
-            self.s.talon.dealRow()
-        self.s.talon.dealCards()          # deal first card to WasteStack
-
-    def fillStack(self, stack):
-        if stack in self.s.rows and not stack.cards:
-            if not self.s.waste.cards:
-                self.s.talon.dealCards()
-            if self.s.waste.cards:
-                self.s.waste.moveMove(1, stack)
-
-    shallHighlightMatch = Game._shallHighlightMatch_SS
-
-
-# ************************************************************************
-# * Squadron
-# ************************************************************************
-
-class Squadron(FortyThieves):
-    RowStack_Class = SS_RowStack
-    Foundation_Class = SS_FoundationStack
-
-    ROWS = 10
-    RESERVES = 3
-
-    def createGame(self):
-        l, s = Layout(self), self.s
-        decks = self.gameinfo.decks
-
-        self.setSize(l.XM + (2 + self.ROWS) * l.XS, l.YM
-                     + max(4.5 * l.YS, 2 * l.YS + 12 * l.YOFFSET))
-
-        x, y = l.XM, l.YM
-        s.talon = WasteTalonStack(x, y, self, max_rounds=1)
-        l.createText(s.talon, 's')
-        x += l.XS
-        s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, 's')
-        x += 2 * l.XS
-        for i in range(4 * decks):
-            s.foundations.append(self.Foundation_Class(x, y, self,
-                                                       suit=i // decks))
-            x += l.XS
-        x, y = l.XM, l.YM + l.YS * 3//2
-        for i in range(self.RESERVES):
-            s.reserves.append(ReserveStack(x, y, self))
-            y += l.YS
-        x, y = l.XM+2*l.XS, l.YM+l.YS
-        for i in range(self.ROWS):
-            s.rows.append(self.RowStack_Class(x, y, self, max_move=1))
-            x += l.XS
-
-        l.defaultStackGroups()
-
-    def startGame(self):
-        self.s.talon.dealRow(rows=self.s.reserves, frames=0)
-        self._startDealNumRows(3)
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()          # deal first card to WasteStack
-
-
-# ************************************************************************
-# * Waterloo
-# ************************************************************************
-
-class Waterloo(FortyThieves):
-
-    RowStack_Class = Spider_SS_RowStack
-
-    ROW_MAX_MOVE = UNLIMITED_MOVES
-    DEAL = (0, 1)
-
-    def createGame(self):
-        FortyThieves.createGame(self, rows=6)
-
-    def _shuffleHook(self, cards):
-        # move Aces to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(
-            cards, lambda c: (c.rank == ACE, (c.deck, c.suit)))
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow(rows=self.s.foundations)
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()          # deal first card to WasteStack
-
-    getQuickPlayScore = Game._getSpiderQuickPlayScore
-    shallHighlightMatch = Game._shallHighlightMatch_RK
 
 
 # ************************************************************************
@@ -735,31 +427,9 @@ class Interchange(FortyThieves):
         self.s.talon.dealCards()
 
 
-class Unlimited(Interchange):
-    def createGame(self):
-        FortyThieves.createGame(self, rows=7, XOFFSET=0,
-                                max_rounds=UNLIMITED_REDEALS)
-
-
 class Alternation(Interchange):
     RowStack_Class = AC_RowStack
     shallHighlightMatch = Game._shallHighlightMatch_AC
-
-
-class TripleInterchange(Interchange):
-    RowStack_Class = SS_RowStack
-
-    def createGame(self):
-        FortyThieves.createGame(self, rows=9, XOFFSET=0,
-                                max_rounds=UNLIMITED_REDEALS)
-
-    def startGame(self):
-        for i in (0, 1, 2, 3):
-            self.s.talon.dealRow(frames=0)
-            self.s.talon.dealRow(flip=0, frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()
 
 
 # register the game
@@ -771,83 +441,33 @@ registerGame(GameInfo(80, BusyAces, "Busy Aces",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(228, Limited, "Limited",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(79, WaningMoon, "Waning Moon",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(125, Lucas, "Lucas",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(109, Deuces, "Deuces",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("Twos", "Les Deux")))
-registerGame(GameInfo(196, Corona, "Corona",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED,
-                      altnames=("Round Dozen")))
-registerGame(GameInfo(195, Quadrangle, "Quadrangle",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
-registerGame(GameInfo(110, Courtyard, "Courtyard",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
-registerGame(GameInfo(23, FortyAndEight, "Forty and Eight",
-                      GI.GT_FORTY_THIEVES, 2, 1, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(115, LittleForty, "Little Forty",         # was: 72
                       GI.GT_FORTY_THIEVES, 2, 3, GI.SL_BALANCED))
-registerGame(GameInfo(76, Streets, "Streets",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(73, Maria, "Maria",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED,
-                      altnames=("Maria Luisa", "Thirty-Six Card Tableau")))
 registerGame(GameInfo(70, NumberTen, "Number Ten",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(71, RankAndFile, "Rank and File",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED,
                       altnames=("Dress Parade")))
-registerGame(GameInfo(126, RedAndBlack, "Red and Black",        # was: 75
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
-registerGame(GameInfo(113, Zebra, "Zebra",
-                      GI.GT_FORTY_THIEVES, 2, 1, GI.SL_BALANCED))
 registerGame(GameInfo(69, Indian, "Indian",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
-registerGame(GameInfo(74, Midshipman, "Midshipman",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
-registerGame(GameInfo(131, DoubleRail, "Double Rail",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
-registerGame(GameInfo(199, SingleRail, "Single Rail",
-                      GI.GT_FORTY_THIEVES, 1, 0, GI.SL_MOSTLY_LUCK,
-                      altnames=("Auxiliary Sequences")))
 registerGame(GameInfo(295, NapoleonsSquare, "Napoleon's Square",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
-registerGame(GameInfo(310, Emperor, "Emperor",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED,
-                      altnames=("Deauville")))
 registerGame(GameInfo(416, FortunesFavor, "Fortune's Favor",
                       GI.GT_FORTY_THIEVES, 1, 0, GI.SL_LUCK))
-registerGame(GameInfo(426, Octagon, "Octagon",
-                      GI.GT_FORTY_THIEVES, 2, 3, GI.SL_BALANCED))
-registerGame(GameInfo(440, Squadron, "Squadron",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(462, Josephine, "Josephine",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL,
                       altnames=("Forty Bandits", "Pack of Thieves")))
 registerGame(GameInfo(493, MarieRose, "Marie Rose",
                       GI.GT_FORTY_THIEVES, 3, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(540, Waterloo, "Waterloo",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(574, Interchange, "Interchange",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(575, Unlimited, "Unlimited",
-                      GI.GT_FORTY_THIEVES, 2, -1, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(628, Crossroads, "Crossroads",
                       GI.GT_FORTY_THIEVES, 4, 0, GI.SL_BALANCED))
 registerGame(GameInfo(631, Alternation, "Alternation",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
-registerGame(GameInfo(679, TripleInterchange, "Triple Interchange",
-                      GI.GT_FORTY_THIEVES, 3, -1, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(775, SixtyThieves, "Sixty Thieves",
                       GI.GT_FORTY_THIEVES, 3, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(776, EightyThieves, "Eighty Thieves",
-                      GI.GT_FORTY_THIEVES, 4, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(847, Pluto, "Pluto",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("Square")))
 registerGame(GameInfo(848, Malmaison, "Malmaison",
                       GI.GT_FORTY_THIEVES, 4, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(981, NapoleonsFolly, "Napoleon's Folly",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL))

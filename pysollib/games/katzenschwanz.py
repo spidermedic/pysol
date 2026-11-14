@@ -424,16 +424,11 @@ class Intrigue(SalicLaw):
 
 
 # register the game
-registerGame(GameInfo(141, DerKatzenschwanz, "Cat's Tail",
-                      GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("Der Katzenschwanz",)))
 registerGame(GameInfo(142, DieSchlange, "Snake",
                       GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL,
                       altnames=("Die Schlange",)))
 registerGame(GameInfo(279, Kings, "Kings",
                       GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL,
                       altnames=("Retinue of Kings", "King's Plume")))
-registerGame(GameInfo(299, SalicLaw, "Salic Law",
-                      GI.GT_MISC_TYPE, 2, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(523, Intrigue, "Intrigue",
                       GI.GT_MISC_TYPE, 2, 0, GI.SL_BALANCED))

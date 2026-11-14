@@ -5,6 +5,7 @@
 /build/*
 /data/cardsets/*
 /data/html/*
+/data/html [0-9]*/
 /dist/*
 /docs/all_games.html
 /html

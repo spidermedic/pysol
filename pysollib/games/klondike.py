@@ -38,7 +38,6 @@ from pysollib.stack import (
     OpenStack,
     OpenTalonStack,
     RK_RowStack,
-    RedealTalonStack,
     ReserveStack,
     SC_RowStack,
     SS_FoundationStack,
@@ -104,15 +103,6 @@ class Klondike(Game):
 class KlondikeByThrees(Klondike):
     def createGame(self):
         Klondike.createGame(self, num_deal=3)
-
-
-# ************************************************************************
-# * Half Klondike
-# ************************************************************************
-
-class HalfKlondike(Klondike):
-    def createGame(self):
-        Klondike.createGame(self, rows=4)
 
 
 # ************************************************************************
@@ -250,24 +240,6 @@ class Somerset(Klondike):
         self.s.talon.dealRow(rows=self.s.rows[7:])
 
 
-class Usk(Somerset):
-
-    Talon_Class = RedealTalonStack
-    RowStack_Class = StackWrapper(AC_RowStack, base_rank=KING)
-    Solver_Class = None
-
-    def createGame(self):
-        lay = Klondike.createGame(self, max_rounds=2, rows=10,
-                                  waste=False, texts=False, round_text=True)
-        lay.createRoundText(self.s.talon, 'ne')
-
-    def redealCards(self):
-        n = 0
-        while self.s.talon.cards:
-            self.s.talon.dealRowAvail(rows=self.s.rows[n:], frames=4)
-            n += 1
-
-
 # ************************************************************************
 # * Canister
 # * American Canister
@@ -391,11 +363,6 @@ class Batsford(Klondike):
         if round_text:
             lay.createRoundText(self.s.talon, 'ne', dx=lay.XS)
         lay.defaultStackGroups()
-
-
-class BatsfordAgain(Batsford):
-    def createGame(self):
-        Batsford.createGame(self, max_rounds=2)
 
 
 # ************************************************************************
@@ -663,46 +630,6 @@ class Phoenix(Klondike):
 
 
 # ************************************************************************
-# * Aunt Mary
-# ************************************************************************
-
-class AuntMary(Klondike):
-    def createGame(self):
-        Klondike.createGame(self, rows=6, max_rounds=1)
-
-    def startGame(self):
-        for i in range(5):
-            j = i+1
-            self.s.talon.dealRow(rows=self.s.rows[:j], frames=0, flip=1)
-            self.s.talon.dealRow(rows=self.s.rows[j:], frames=0, flip=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()
-
-
-# ************************************************************************
-# * Moving Left
-# ************************************************************************
-
-class MovingLeft(Klondike):
-
-    def createGame(self):
-        Klondike.createGame(self, max_rounds=1, rows=10, playcards=24)
-
-    def fillStack(self, stack):
-        if not stack.cards:
-            old_state = self.enterState(self.S_FILL)
-            if stack in self.s.rows:
-                i = list(self.s.rows).index(stack)
-                if i < len(self.s.rows)-1:
-                    from_stack = self.s.rows[i+1]
-                    pile = from_stack.getPile()
-                    if pile:
-                        from_stack.moveMove(len(pile), stack)
-            self.leaveState(old_state)
-
-
-# ************************************************************************
 # * Big Forty
 # * Ali Baba
 # ************************************************************************
@@ -731,18 +658,6 @@ class AliBaba(BigForty):
 
 
 # ************************************************************************
-# * Saratoga
-# ************************************************************************
-
-class Saratoga(Klondike):
-    def createGame(self):
-        Klondike.createGame(self, num_deal=3)
-
-    def startGame(self):
-        Klondike.startGame(self, flip=1)
-
-
-# ************************************************************************
 # * Whitehorse
 # ************************************************************************
 
@@ -768,18 +683,6 @@ class Whitehorse(Klondike):
 
 
 # ************************************************************************
-# * Gold Rush
-# ************************************************************************
-
-class GoldRush(Klondike):
-    Talon_Class = CanfieldRush_Talon
-
-    def createGame(self):
-        lay = Klondike.createGame(self, max_rounds=3, round_text=True)
-        lay.createRoundText(self.s.talon, 'ne', dx=lay.XS)
-
-
-# ************************************************************************
 # * Gold Mine
 # ************************************************************************
 
@@ -795,21 +698,6 @@ class GoldMine(Klondike):
 
     def startGame(self):
         self.startDealSample()
-        self.s.talon.dealCards()
-
-
-# ************************************************************************
-# * Athena
-# ************************************************************************
-
-class Athena(Klondike):
-
-    def startGame(self):
-        self.s.talon.dealRow(frames=0, flip=0)
-        self.s.talon.dealRow(frames=0)
-        self.s.talon.dealRow(frames=0, flip=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
         self.s.talon.dealCards()
 
 
@@ -836,8 +724,6 @@ registerGame(GameInfo(58, ThumbAndPouch, "Thumb and Pouch",
                       GI.GT_KLONDIKE, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(67, Whitehead, "Whitehead",
                       GI.GT_KLONDIKE, 1, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(66, Eastcliff, "Eastcliff",
-                      GI.GT_KLONDIKE, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(224, Easthaven, "Easthaven",
                       GI.GT_GYPSY, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(33, Westcliff, "Westcliff",
@@ -854,8 +740,6 @@ registerGame(GameInfo(231, Canister, "Canister",
 registerGame(GameInfo(229, AgnesSorel, "Agnes Sorel",
                       GI.GT_GYPSY, 1, 0, GI.SL_MOSTLY_LUCK,
                       altnames=("Agnes",)))
-registerGame(GameInfo(4, EightTimesEight, "8 x 8",
-                      GI.GT_KLONDIKE, 2, -1, GI.SL_BALANCED))
 registerGame(GameInfo(133, Batsford, "Batsford",
                       GI.GT_KLONDIKE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(221, Stonewall, "Stonewall",
@@ -878,37 +762,17 @@ registerGame(GameInfo(263, Phoenix, "Phoenix",
 #                       GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
 # registerGame(GameInfo(333, OpenJumbo, "Open Jumbo",
 #                       GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
-registerGame(GameInfo(407, AuntMary, "Aunt Mary",
-                      GI.GT_KLONDIKE, 1, 0, GI.SL_BALANCED))
 # registerGame(GameInfo(452, DoubleEasthaven, "Double Easthaven",
 #                       GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL))
 # registerGame(GameInfo(453, TripleEasthaven, "Triple Easthaven",
 #                       GI.GT_GYPSY, 3, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(470, MovingLeft, "Moving Left",
-                      GI.GT_KLONDIKE, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(473, BigForty, "Big Forty",
                       GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED))
 registerGame(GameInfo(474, AliBaba, "Ali Baba",
                       GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED))
-registerGame(GameInfo(479, Saratoga, "Saratoga",
-                      GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED,
-                      altnames=("Thoughtful",)))
 registerGame(GameInfo(491, Whitehorse, "Whitehorse",
                       GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED))
-registerGame(GameInfo(532, GoldRush, "Gold Rush",
-                      GI.GT_KLONDIKE, 1, 2, GI.SL_BALANCED))
-registerGame(GameInfo(539, Usk, "Usk",
-                      GI.GT_KLONDIKE | GI.GT_OPEN, 1, 1, GI.SL_BALANCED))
-registerGame(GameInfo(541, BatsfordAgain, "Batsford Again",
-                      GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
 registerGame(GameInfo(572, GoldMine, "Gold Mine",
                       GI.GT_NUMERICA, 1, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(633, Athena, "Athena",
-                      GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED))
 registerGame(GameInfo(651, EightByEight, "Eight by Eight",
                       GI.GT_KLONDIKE, 2, 2, GI.SL_BALANCED))
-registerGame(GameInfo(667, Kingsley, "Kingsley",
-                      GI.GT_KLONDIKE, 1, 0, GI.SL_MOSTLY_LUCK))
-registerGame(GameInfo(855, HalfKlondike, "Half Klondike",
-                      GI.GT_KLONDIKE | GI.GT_STRIPPED, 1, -1, GI.SL_BALANCED,
-                      suits=(1, 2)))

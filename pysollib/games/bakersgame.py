@@ -294,8 +294,6 @@ class Flipper(Tuxedo):
 # register the game
 registerGame(GameInfo(45, BakersGame, "Baker's Game",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
-registerGame(GameInfo(26, KingOnlyBakersGame, "King Only Baker's Game",
-                      GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
 registerGame(GameInfo(258, EightOff, "Eight Off",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(9, SeahavenTowers, "Seahaven Towers",

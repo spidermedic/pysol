@@ -58,14 +58,12 @@ from . import needle  # noqa: F401
 from . import numerica  # noqa: F401
 from . import osmosis  # noqa: F401
 from . import picturegallery  # noqa: F401
-from . import precedence  # noqa: F401
 from . import pushpin  # noqa: F401
 from . import pyramid  # noqa: F401
 from . import royalcotillion  # noqa: F401
 from . import sanibel  # noqa: F401
 from . import siebenbisas  # noqa: F401
 from . import spider  # noqa: F401
-from . import sthelena  # noqa: F401
 from . import sultan  # noqa: F401
 from . import terrace  # noqa: F401
 from . import threepeaks  # noqa: F401

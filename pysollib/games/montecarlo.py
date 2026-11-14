@@ -441,51 +441,6 @@ class Nestor(Game):
 
 
 # ************************************************************************
-# * Vertical
-# ************************************************************************
-
-class Vertical(Nestor):
-
-    def createGame(self):
-        # create layout
-        l, s = Layout(self), self.s
-
-        # set window
-        self.setSize(l.XM+9*l.XS, l.YM+2*l.YS+12*l.YOFFSET)
-
-        # create stacks
-        x, y = l.XM, l.YM
-        for i in range(7):
-            s.rows.append(self.RowStack_Class(x, y, self,
-                                              max_move=1, max_accept=1,
-                                              dir=0, base_rank=NO_RANK))
-            x += l.XS
-        x, y = l.XM, self.height-l.YS
-        for i in range(9):
-            s.rows.append(self.RowStack_Class(x, y, self,
-                                              max_move=1, max_accept=1,
-                                              dir=0, base_rank=NO_RANK))
-            x += l.XS
-        x, y = self.width-l.XS, l.YM
-        s.foundations.append(self.Foundation_Class(x, y, self, suit=ANY_SUIT,
-                             max_move=0, max_cards=52, base_rank=ANY_RANK))
-        l.createText(s.foundations[0], "s")
-        x -= l.XS
-        s.talon = InitialDealTalonStack(x, y, self)
-
-        # define stack-groups
-        l.defaultStackGroups()
-
-    def startGame(self):
-        self.s.talon.dealRow(frames=0)
-        for i in range(4):
-            self.s.talon.dealRow(rows=self.s.rows[:7], frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow(rows=self.s.rows[:7])
-        self.s.talon.dealRow(rows=[self.s.rows[3]])
-
-
-# ************************************************************************
 # * The Wish
 # ************************************************************************
 
@@ -546,54 +501,10 @@ class TheWish(Game):
         return card1.rank == card2.rank
 
 
-# ************************************************************************
-# * Aces Square
-# ************************************************************************
-
-class AcesSquare_RowStack(MonteCarlo_RowStack):
-    def acceptsCards(self, from_stack, cards):
-        if not OpenStack.acceptsCards(self, from_stack, cards):
-            return False
-        if self.cards[-1].rank == 0 or cards[0].rank == 0:
-            return False
-
-        return (self.game.isNeighbour(from_stack, self)
-                and self.cards[-1].suit == cards[0].suit)
-
-
-class AcesSquare(MonteCarlo):
-    Talon_Class = AutoDealTalonStack
-    RowStack_Class = AcesSquare_RowStack
-
-    def createGame(self):
-        MonteCarlo.createGame(self, rows=4, cols=4)
-
-    def isGameWon(self):
-        return len(self.s.foundations[0].cards) == 48
-
-    def fillStack(self, stack):
-        if stack in self.s.rows:
-            if len(stack.cards) == 0 and len(self.s.talon.cards) > 0:
-                self.flipMove(self.s.talon)
-                self.moveMove(1, self.s.talon, stack)
-
-    def isNeighbour(self, stack1, stack2):
-        return (stack1.id // 4 == stack2.id // 4 or
-                stack1.id % 4 == stack2.id % 4)
-
-    def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return (card1.suit == card2.suit and
-                card1.rank != card2.rank != 0)
-
-
 # register the game
 registerGame(GameInfo(89, MonteCarlo, "Monte Carlo",
                       GI.GT_PAIRING_TYPE, 1, 0, GI.SL_MOSTLY_LUCK,
                       altnames=("Quilt",)))
-registerGame(GameInfo(91, SimplePairs, "Simple Pairs",
-                      GI.GT_PAIRING_TYPE | GI.GT_CHILDREN, 1, 0,
-                      GI.SL_LUCK, altnames=("Jamestown", "Pirate Gold",
-                                            "Treasure Hunt", "Hunter")))
 registerGame(GameInfo(96, Fourteen, "Fourteen",
                       GI.GT_PAIRING_TYPE | GI.GT_OPEN | GI.GT_CHILDREN, 1, 0,
                       GI.SL_MOSTLY_LUCK, altnames=("Fourteen Out",
@@ -606,11 +517,5 @@ registerGame(GameInfo(328, TheWish, "The Wish",
                       GI.GT_PAIRING_TYPE | GI.GT_STRIPPED | GI.GT_CHILDREN,
                       1, 0, GI.SL_MOSTLY_LUCK,
                       ranks=(0, 6, 7, 8, 9, 10, 11, 12)))
-registerGame(GameInfo(368, Vertical, "Vertical",
-                      GI.GT_PAIRING_TYPE | GI.GT_OPEN, 1, 0,
-                      GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(829, BlockTen, "Block Ten",
                       GI.GT_PAIRING_TYPE, 1, 0, GI.SL_LUCK))
-registerGame(GameInfo(898, AcesSquare, "Aces Square",
-                      GI.GT_PAIRING_TYPE, 1, 0, GI.SL_BALANCED,
-                      altnames=("Miner",)))

@@ -1242,10 +1242,6 @@ class Triangle(Pyramid):
 # register the game
 registerGame(GameInfo(38, Pyramid, "Pyramid",
                       GI.GT_PAIRING_TYPE, 1, 2, GI.SL_MOSTLY_LUCK))
-registerGame(GameInfo(193, RelaxedPyramid, "Relaxed Pyramid",
-                      GI.GT_PAIRING_TYPE | GI.GT_RELAXED, 1, 2,
-                      GI.SL_MOSTLY_LUCK,
-                      altnames=("Pyramid's Stones", "Pyramid Clear")))
 registerGame(GameInfo(592, Giza, "Giza",
                       GI.GT_PAIRING_TYPE | GI.GT_OPEN, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(593, Thirteens, "Thirteens",
@@ -1254,8 +1250,6 @@ registerGame(GameInfo(593, Thirteens, "Thirteens",
 registerGame(GameInfo(594, Elevens, "Elevens",
                       GI.GT_PAIRING_TYPE, 1, 0, GI.SL_LUCK,
                       altnames=('Eleven Away',)))
-registerGame(GameInfo(595, ElevensToo, "Elevens Too",
-                      GI.GT_PAIRING_TYPE, 1, 0, GI.SL_LUCK))
 registerGame(GameInfo(596, SuitElevens, "Suit Elevens",
                       GI.GT_PAIRING_TYPE, 1, 0, GI.SL_LUCK))
 registerGame(GameInfo(597, Fifteens, "Fifteens",
@@ -1263,9 +1257,6 @@ registerGame(GameInfo(597, Fifteens, "Fifteens",
 registerGame(GameInfo(619, TripleAlliance, "Triple Alliance",
                       GI.GT_PAIRING_TYPE | GI.GT_OPEN, 1, 0,
                       GI.SL_MOSTLY_SKILL, altnames=('Triplets',)))
-registerGame(GameInfo(655, Pharaohs, "Pharaohs",
-                      GI.GT_PAIRING_TYPE | GI.GT_OPEN, 1, 0, GI.SL_BALANCED,
-                      altnames=("Three Pharaohs",)))
 registerGame(GameInfo(657, Baroness, "Baroness",
                       GI.GT_PAIRING_TYPE, 1, 0, GI.SL_BALANCED,
                       altnames=('Five Piles', 'Foxfire 13')))
