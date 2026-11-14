@@ -161,6 +161,7 @@ class PysolToolbarTk:
         self.side = -1
         self._tooltips = []
         self._widgets = []
+        self._toggled = {}
         self.dir = dir
         self.size = size
         self.compound = compound
@@ -179,14 +180,13 @@ class PysolToolbarTk:
             (None,           None,            None),
             ("Undo",     self.mUndo,      "Undo last move"),
             ("Redo",     self.mRedo,      "Redo last move"),
-            ("Bookmark", self.mSetBookmark, "Set bookmark"),
-            ("Go to bookmark", self.mGotoBookmark,
-             "Go to bookmark"),
+            ("Bookmark", self.mBookmark, "Set bookmark"),
             ("Autodrop", self.mDrop,      "Auto drop cards"),
             ("Shuffle",  self.mShuffle,   "Shuffle tiles"),
             ("Hint",     self.mHint,      "Hint"),
             ("Pause",    self.mPause,     "Pause game"),
             (None,           None,            None),
+            ("Favorite", self.mFavorite,  "Add to favorites"),
             ("Rules",    self.mHelpRules, "Rules for this game"),
                 ):
             if label is None:
@@ -197,8 +197,6 @@ class PysolToolbarTk:
                 )
             elif label == 'Pause':
                 self._createButton(label, f, check=True, tooltip=t)
-            elif label == 'Go to bookmark':
-                self._createButton(label, f, tooltip=t, name='gotobookmark')
             else:
                 self._createButton(label, f, tooltip=t)
         self.pause_button.config(variable=menubar.tkopt.pause)
@@ -278,7 +276,11 @@ class PysolToolbarTk:
         return dis_tkim
 
     def _setButtonImage(self, button, name):
-        image = self._loadImage(name)
+        # toggle buttons (favorite, bookmark) show a filled icon when on
+        file = name
+        if self._toggled.get(name):
+            file = name + '_on'
+        image = self._loadImage(file)
         setattr(self, name + "_image", image)
         if Image:
             dis_image = self._createDisabledButtonImage(image)
@@ -313,6 +315,7 @@ class PysolToolbarTk:
             b = MfxTooltip(button)
             self._tooltips.append(b)
             b.setText(tooltip)
+            setattr(self, name + "_tooltip", b)
         return button
 
     def _createLabel(self, name, label=None, tooltip=None):
@@ -413,6 +416,24 @@ class PysolToolbarTk:
             self._setButtonImage(w, name)
         self.setCompound(self.compound, force=True)
         return 1
+
+    def _setToggle(self, name, on, tip_on, tip_off):
+        on = bool(on)
+        if on == bool(self._toggled.get(name)):
+            return
+        self._toggled[name] = on
+        self._setButtonImage(getattr(self, name + '_button'), name)
+        getattr(self, name + '_tooltip').setText(tip_on if on else tip_off)
+
+    def setFavorite(self, on):
+        """Show a filled heart if the current game is a favorite."""
+        self._setToggle('favorite', on,
+                        "Remove from favorites", "Add to favorites")
+
+    def setBookmark(self, on):
+        """Show a filled bookmark if the current game has a bookmark."""
+        self._setToggle('bookmark', on,
+                        "Go to or clear bookmark", "Set bookmark")
 
     def setCompound(self, compound, force=False):
         if not force and self.compound == compound:

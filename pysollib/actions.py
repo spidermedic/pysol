@@ -571,14 +571,9 @@ class PysolToolbar(PysolToolbarTk):
             self.menubar.mRedo()
         return 1
 
-    def mSetBookmark(self, *args):
+    def mBookmark(self, *args):
         if not self._busy():
-            self.menubar.mSetBookmark(0)
-        return 1
-
-    def mGotoBookmark(self, *args):
-        if not self._busy():
-            self.menubar.mGotoBookmark(0)
+            self.menubar.mBookmarkButton()
         return 1
 
     def mDrop(self, *args):
@@ -599,6 +594,11 @@ class PysolToolbar(PysolToolbarTk):
     def mPause(self, *args):
         if not self._busy():
             self.menubar.mPause()
+        return 1
+
+    def mFavorite(self, *args):
+        if not self._busy():
+            self.menubar.mToggleFavor()
         return 1
 
     def mHelpRules(self, *args):

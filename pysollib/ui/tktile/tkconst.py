@@ -90,10 +90,10 @@ TOOLBAR_BUTTONS = (
     "undo",
     "redo",
     "bookmark",
-    "gotobookmark",
     "autodrop",
     "shuffle",
     "hint",
     "pause",
+    "favorite",
     "rules",
     )

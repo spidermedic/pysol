@@ -770,6 +770,9 @@ class PysolMenubarTkCommon:
                                state=state(in_favor))
         submenu.insert_separator(2)
         menu.entryconfig(index, state=state(True))
+        toolbar = getattr(self.app, 'toolbar', None)
+        if toolbar is not None:
+            toolbar.setFavorite(in_favor)
 
     def updateRecentGamesMenu(self, gameids):
         submenu = self.menupath[".menubar.games.recentgames"][2]
@@ -795,10 +798,10 @@ class PysolMenubarTkCommon:
         s = self.game.gsaveinfo.bookmarks.get(0) is not None
         menu, index, submenu = mp2
         menu.entryconfig(index, state=state(s and x))
-        # the toolbar buttons
+        # the toolbar button: filled when the game has a bookmark
         if getattr(self.app, 'toolbar', None) is not None:
-            self.setToolbarState(x, "bookmark")
-            self.setToolbarState(s and x, "gotobookmark")
+            self.setToolbarState(x or s, "bookmark")
+            self.app.toolbar.setBookmark(s)
 
     def updateBackgroundImagesMenu(self):
         # the card backs are in the Settings window
@@ -853,6 +856,33 @@ class PysolMenubarTkCommon:
         if gameid in self.app.opt.favorite_gameid:
             self.app.opt.favorite_gameid.remove(gameid)
             self.updateFavoriteGamesMenu()
+
+    def mBookmarkButton(self, *event):
+        """Toolbar bookmark button: set a bookmark, or if one exists, ask
+        whether to go to it or clear it."""
+        if self.game.gsaveinfo.bookmarks.get(0) is None:
+            self.mSetBookmark(0)
+            return
+        if self._cancelDrag():
+            return
+        d = self._calc_MfxMessageDialog()(
+            self.top, title="Bookmark",
+            text="This game has a bookmark.\nWhat do you want to do?",
+            bitmap="question",
+            strings=("&Go to bookmark", "C&lear bookmark", "&Cancel"))
+        if d.status != 0:
+            return
+        if d.button == 0:
+            self.mGotoBookmark(0, confirm=0)
+        elif d.button == 1:
+            self.game.gsaveinfo.bookmarks.pop(0, None)
+            self.game.updateMenus()
+
+    def mToggleFavor(self, *event):
+        if self.app.game.id in self.app.opt.favorite_gameid:
+            self.mDelFavor()
+        else:
+            self.mAddFavor()
 
     def mClearRecent(self, *event):
         if self._cancelDrag(break_pause=False):

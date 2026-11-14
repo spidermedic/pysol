@@ -14,7 +14,7 @@ import AppKit
 // toolbar button name -> Phosphor icon file name
 let icons: [(String, String)] = [
     ("new", "file-plus"),
-    ("restart", "arrow-counter-clockwise"),
+    ("restart", "clock-counter-clockwise"),
     ("open", "folder-open"),
     ("save", "floppy-disk"),
     ("undo", "arrow-u-up-left"),
@@ -25,13 +25,25 @@ let icons: [(String, String)] = [
     ("pause", "pause"),
     ("rules", "book-open"),
     ("bookmark", "bookmark-simple"),
-    ("gotobookmark", "bookmark-simple-fill"),
+    ("bookmark_on", "bookmark-simple-fill"),
+    ("favorite", "heart"),
+    ("favorite_on", "heart-fill"),
+]
+// "on" icons are coloured instead of black/white: name -> (light UI, dark UI)
+func hex(_ v: Int) -> NSColor {
+    return NSColor(deviceRed: CGFloat((v >> 16) & 255) / 255,
+                   green: CGFloat((v >> 8) & 255) / 255,
+                   blue: CGFloat(v & 255) / 255, alpha: 1)
+}
+let onColors: [String: (NSColor, NSColor)] = [
+    "favorite_on": (hex(0xE0343B), hex(0xFF5A5F)),   // red
+    "bookmark_on": (hex(0xF0B000), hex(0xFFD43B)),   // yellow
 ]
 let sizes: [(String, Int)] = [("small", 24), ("large", 32), ("xlarge", 48)]
 let src = CommandLine.arguments[1]
 let out = CommandLine.arguments[2]
 
-func render(_ file: String, px: Int, white: Bool) -> Data? {
+func render(_ file: String, px: Int, white: Bool, color: NSColor? = nil) -> Data? {
     guard let svg = NSImage(contentsOfFile: file) else { return nil }
     let scale = 2   // draw at 2x, then let the PNG carry px x px pixels
     let rep = NSBitmapImageRep(
@@ -45,7 +57,7 @@ func render(_ file: String, px: Int, white: Bool) -> Data? {
     let box = side * 0.92
     svg.draw(in: NSRect(x: (side - box) / 2, y: (side - box) / 2,
                         width: box, height: box))
-    (white ? NSColor.white : NSColor.black).set()
+    (color ?? (white ? NSColor.white : NSColor.black)).set()
     NSRect(x: 0, y: 0, width: side, height: side).fill(using: .sourceAtop)
     NSGraphicsContext.restoreGraphicsState()
     // scale down to the final size with good quality
@@ -69,7 +81,9 @@ for white in [false, true] {
         let dir = white ? "\(out)/light/\(sizeName)" : "\(out)/\(sizeName)"
         try! fm.createDirectory(atPath: dir, withIntermediateDirectories: true)
         for (name, file) in icons {
-            guard let data = render("\(src)/\(file).svg", px: px, white: white)
+            let tint = onColors[name].map { white ? $0.1 : $0.0 }
+            guard let data = render("\(src)/\(file).svg", px: px, white: white,
+                                    color: tint)
             else { print("cannot render", file); exit(1) }
             try! data.write(to: URL(fileURLWithPath: "\(dir)/\(name).png"))
         }

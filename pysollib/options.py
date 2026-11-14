@@ -591,7 +591,8 @@ class Options:
             if known is None:
                 # file written before the bookmark buttons existed
                 known = [b for b in TOOLBAR_BUTTONS
-                         if b not in ('bookmark', 'gotobookmark')]
+                         if b not in ('bookmark', 'gotobookmark',
+                                      'favorite')]
             for key in TOOLBAR_BUTTONS:
                 if key in known:
                     self.toolbar_vars[key] = (key in visible_buttons)
