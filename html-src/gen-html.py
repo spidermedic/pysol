@@ -62,7 +62,7 @@ rules_files = [
 
 
 def _fmt(fmt, params):
-    return fmt % merge_dicts(params, {'logo_url': "images/pysollogo03.png",
+    return fmt % merge_dicts(params, {'logo_url': "images/pysollogo04.png",
                                       'logo_alt': "PySol Lite Logo"})
 
 
@@ -80,7 +80,6 @@ alink="#FF0000">
 '''
 main_footer = '''
 <p>
-<br>
 %(back_to_index_link)s
 <hr>
 <i>PySol Lite Documentation - version ''' + VERSION + '''</i>
@@ -95,7 +94,7 @@ rules_header = '''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 </head>
 <body text="#000000" bgcolor="#F7F3FF" link="#0000FF" vlink="#660099"
-link="#FF0000">
+alink="#FF0000">
 <img src="../%(logo_url)s" alt="%(logo_alt)s">
 <br>
 '''
@@ -115,19 +114,6 @@ rules_footer = '''
 <i>PySol Lite Documentation - version ''' + VERSION + '''</i>
 </body>
 </html>'''
-
-wikipedia_header = '''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
-<html>
-<head>
-<title>%(title)s</title>
-<meta name="license" content="GNU General Public License">
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-</head>
-<body text="#000000" bgcolor="#F7F3FF" link="#0000FF" vlink="#660099"
-alink="#FF0000">
-<img src="../%(logo_url)s" alt="%(logo_alt)s">
-<br>
-'''
 
 
 def _get_game_rules_filename(n):
@@ -152,7 +138,6 @@ def gen_main_html():
 def gen_rules_html():
     # ls = glob(os.path.join('rules', '*.html'))
     rules_ls = sorted(os.listdir('rules'))
-    wikipedia_ls = sorted(os.listdir('wikipedia'))
 
     games = GAME_DB.getGamesIdSortedByName()
     rules_list = []
@@ -180,8 +165,6 @@ def gen_rules_html():
 
         if rules_fn in rules_ls:
             rules_dir = 'rules'
-        elif rules_fn in wikipedia_ls:
-            rules_dir = 'wikipedia'
         else:
             print('missing rules for %s (file: %s)'
                   % (gi.name, rules_fn))
@@ -227,10 +210,7 @@ def gen_rules_html():
     for dir, filename, title, footer in rules_list:
         outfile = open(
             os.path.join('html', 'rules', filename), 'w', encoding='utf-8')
-        if dir == 'rules':
-            print(_fmt(rules_header, {'title': title}), file=outfile)
-        else:  # d == 'wikipedia'
-            print(_fmt(wikipedia_header, {'title': title}), file=outfile)
+        print(_fmt(rules_header, {'title': title}), file=outfile)
         with open(os.path.join(dir, filename), 'r', encoding='utf-8') as file:
             print(file.read(), file=outfile)
         print(_fmt(rules_footer, {'footer': footer}), file=outfile)

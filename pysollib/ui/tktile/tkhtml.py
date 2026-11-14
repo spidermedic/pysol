@@ -62,6 +62,7 @@ class tkHTMLWriter(pysollib.formatter.NullWriter):
             "h4": (font[0], size + 4*sign, "bold"),
             "h5": (font[0], size + 2*sign, "bold"),
             "h6": (font[0], size + 1*sign, "bold"),
+            "gap": (font[0], max(3, abs(size) // 2) * sign),
             "bold": (font[0], size, "bold"),
             "italic": (font[0], size, "italic"),
             "pre": fixed,
@@ -71,6 +72,9 @@ class tkHTMLWriter(pysollib.formatter.NullWriter):
         self.text.config(cursor=self.viewer.defcursor, font=font)
         for f, cur_font in self.fontmap.items():
             self.text.tag_config(f, font=cur_font)
+        # a little extra room above headings
+        for f, above in (("h1", 4), ("h2", 10), ("h3", 8), ("h4", 6)):
+            self.text.tag_config(f, spacing1=above)
 
         self.anchor = None
         self.anchor_mark = None
@@ -166,7 +170,8 @@ class tkHTMLWriter(pysollib.formatter.NullWriter):
         self.write(' ')
 
     def send_paragraph(self, blankline):
-        self.write("\n" * blankline)
+        # the gap between blocks is a short line, not a full blank line
+        self.text.insert("insert", "\n" * blankline, ("gap",))
 
     def send_line_break(self):
         self.write("\n")
@@ -175,6 +180,7 @@ class tkHTMLWriter(pysollib.formatter.NullWriter):
         width = int(int(self.text["width"]) * 0.9)
         self.write("_" * width)
         self.write("\n")
+        self.text.insert("insert", "\n", ("gap",))
 
     def send_literal_data(self, data):
         self.write(data)
