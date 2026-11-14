@@ -92,17 +92,19 @@ class SelectGameDialog(MfxDialog):
         self.list_searchlabel = tkinter.Label(searchbox, text="Search:",
                                               justify='left', anchor='w')
         self.list_searchlabel.pack(side="top", fill='both', ipadx=1)
-        self.list_searchtext = PysolEntry(searchbox,
+        searchrow = ttk.Frame(searchbox)
+        searchrow.pack(side="top", fill='x')
+        self.list_searchtext = PysolEntry(searchrow,
                                           fieldname="Search:",
                                           textvariable=searchText)
 
-        self.advSearch = PysolButton(searchbox, text='...',
+        self.advSearch = PysolButton(searchrow, text='...',
                                      prefixtext="Advanced Search",
                                      command=self.advancedSearch,
                                      width=2)
-        self.advSearch.pack(side="right")
+        self.advSearch.pack(side="right", padx=padx, pady=pady)
 
-        self.list_searchtext.pack(side="top", fill='both',
+        self.list_searchtext.pack(side="left", fill='x', expand=True,
                                   padx=padx, pady=pady, ipadx=1)
         searchText.trace_add('write', self.basicSearch)
 
@@ -136,9 +138,9 @@ class SelectGameDialog(MfxDialog):
         self.showGameInList(gameid)
 
         # LabelFrame
-        info_frame = ttk.LabelFrame(right_frame, text='About game')
-        info_frame.grid(row=0, column=0, padx=padx, pady=pady,
-                        ipadx=4, ipady=4, sticky='nws')
+        info_frame = ttk.LabelFrame(right_frame)
+        info_frame.grid(row=0, column=0, columnspan=3, padx=padx, pady=pady,
+                        ipadx=4, ipady=4, sticky='ew')
         # Info
         self.info_labels = {}
         for n, t, f, row in (
