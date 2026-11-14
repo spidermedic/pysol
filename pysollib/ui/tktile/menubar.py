@@ -515,17 +515,17 @@ class PysolMenubarTkCommon:
         m = "Ctrl-"
         if sys.platform == "darwin":
             m = "Cmd-"
+        menu.add_command(label="All &games", accelerator=m+"V",
+                         command=self.mSelectGameDialogWithPreview)
         MfxMenu(menu, label="R&ecent games")
         MfxMenu(menu, label="Fa&vorite games")
         menu.add_command(label="A&dd to favorites", command=self.mAddFavor)
         menu.add_command(
             label="Remove &from favorites",
             command=self.mDelFavor)
-        menu.add_separator()
-        menu.add_command(label="All &games", accelerator=m+"V",
-                         command=self.mSelectGameDialogWithPreview)
         if not SELECT_GAME_MENU:
             return
+        menu.add_separator()
         self._addSelectPopularGameSubMenu(games, menu, self.mSelectGame,
                                           self.tkopt.gameid)
         menu.add_separator()
