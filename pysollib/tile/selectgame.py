@@ -143,14 +143,16 @@ class SelectGameDialog(MfxDialog):
                         ipadx=4, ipady=4, sticky='ew')
         # Info
         self.info_labels = {}
+        self.name_label = ttk.Label(info_frame, justify='left', anchor='w')
+        self.name_label.grid(row=0, column=0, columnspan=2, sticky='ew',
+                             padx=4)
+        bind(info_frame, '<Configure>',
+             lambda e: self.name_label.config(
+                 wraplength=max(50, e.width - 24)))
         for n, t, f, row in (
-            ('name',        'Name:',             info_frame,   0),
-            ('altnames',    'Alternate names:',  info_frame,   1),
-            ('category',    'Category:',         info_frame,   2),
-            ('type',        'Type:',             info_frame,   3),
-            ('skill_level', 'Skill level:',      info_frame,   4),
-            ('decks',       'Decks:',            info_frame,   5),
-            ('redeals',     'Redeals:',          info_frame,   6),
+            ('skill_level', 'Skill level:',      info_frame,   1),
+            ('decks',       'Decks:',            info_frame,   2),
+            ('redeals',     'Redeals:',          info_frame,   3),
                 ):
             title_label = ttk.Label(f, text=t, justify='left', anchor='w')
             title_label.grid(row=row, column=0, sticky='nw', padx=4)
@@ -158,7 +160,7 @@ class SelectGameDialog(MfxDialog):
             text_label.grid(row=row, column=1, sticky='nw', padx=4)
             self.info_labels[n] = (title_label, text_label)
         # info_frame.columnconfigure(1, weight=1)
-        info_frame.rowconfigure(6, weight=1)
+        info_frame.rowconfigure(3, weight=1)
         # Canvas
         self.preview = MfxScrolledCanvas(right_frame)
         bind(self.preview.parent, '<Configure>',
@@ -572,11 +574,9 @@ class SelectGameDialog(MfxDialog):
         gi = self.app.gdb.get(gameid)
         # info
         name = gi.name
-        altnames = '\n'.join(gi.altnames)
-        category = (CSI.TYPE[gi.category])
-        type = ''
-        if gi.si.game_type in GI.TYPE_NAMES:
-            type = (GI.TYPE_NAMES[gi.si.game_type])
+        if gi.altnames:
+            name += " (" + ", ".join(gi.altnames) + ")"
+        self.name_label.config(text=name)
         skill_level = GI.SKILL_LEVELS.get(gi.skill_level)
         if gi.redeals == -2:
             redeals = 'Variable'
@@ -585,10 +585,6 @@ class SelectGameDialog(MfxDialog):
         else:
             redeals = str(gi.redeals)
         for n, t in (
-            ('name',        name),
-            ('altnames',    altnames),
-            ('category',    category),
-            ('type',        type),
             ('skill_level', skill_level),
             ('decks',       gi.decks),
             ('redeals',     redeals),
