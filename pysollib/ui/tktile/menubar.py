@@ -519,13 +519,8 @@ class PysolMenubarTkCommon:
                          command=self.mSelectGameDialogWithPreview)
         MfxMenu(menu, label="R&ecent games")
         MfxMenu(menu, label="Fa&vorite games")
-        menu.add_command(label="A&dd to favorites", command=self.mAddFavor)
-        menu.add_command(
-            label="Remove &from favorites",
-            command=self.mDelFavor)
         if not SELECT_GAME_MENU:
             return
-        menu.add_separator()
         self._addSelectPopularGameSubMenu(games, menu, self.mSelectGame,
                                           self.tkopt.gameid)
         menu.add_separator()
@@ -765,17 +760,16 @@ class PysolMenubarTkCommon:
 
         games.sort(key=sort_func)
         state = self._getEnabledState
-        if len(games) > 0:
-            self.updateGamesMenu(submenu, games)
-            menu.entryconfig(index, state=state(True))
-        else:
-            menu.entryconfig(index, state=state(False))
+        self.updateGamesMenu(submenu, games)
         in_favor = self.app.game.id in gameids
-        menu, index, submenu = self.menupath[".menubar.games.addtofavorites"]
-        menu.entryconfig(index, state=state(not in_favor))
-        menu, index, submenu = \
-            self.menupath[".menubar.games.removefromfavorites"]
-        menu.entryconfig(index, state=state(in_favor))
+        submenu.insert_command(0, label="Add current game",
+                               command=self.mAddFavor,
+                               state=state(not in_favor))
+        submenu.insert_command(1, label="Remove current game",
+                               command=self.mDelFavor,
+                               state=state(in_favor))
+        submenu.insert_separator(2)
+        menu.entryconfig(index, state=state(True))
 
     def updateRecentGamesMenu(self, gameids):
         submenu = self.menupath[".menubar.games.recentgames"][2]
